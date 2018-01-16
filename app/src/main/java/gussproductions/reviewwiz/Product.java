@@ -1,26 +1,38 @@
 package gussproductions.reviewwiz;
 
-import java.math.BigDecimal;
-
 public class Product {
-    String isbn;
-    String asin;
-    String upc;
-    String title;
-    String imageURL;
-    BigDecimal amazonPrice;
-    String description;
-    ReviewStats reviewStats;
 
-    public Product(String isbn, String asin, String upc, String title, String imageURL, String description, BigDecimal amazonPrice, ReviewStats reviewStats)
+    private CommonProductInfo commonProductInfo;
+    private AmazonProductInfo amazonProductInfo;
+    private WalmartProductInfo walmartProductInfo;
+
+    public Product(CommonProductInfo commonProductInfo)
     {
-        this.isbn = isbn;
-        this.asin = asin;
-        this.upc = upc;
-        this.title = title;
-        this.imageURL = imageURL;
-        this.description = description;
-        this.amazonPrice = amazonPrice;
-        this.reviewStats = reviewStats;
+        this.commonProductInfo = commonProductInfo;
+    }
+
+    public void setAmazonProductInfo(AmazonProductInfo amazonProductInfo)
+    {
+        this.amazonProductInfo = amazonProductInfo;
+    }
+
+    public void setWalmartProductInfo(WalmartProductInfo walmartProductInfo)
+    {
+        this.walmartProductInfo = walmartProductInfo;
+    }
+
+    public CommonProductInfo getCommonProductInfo()
+    {
+        return commonProductInfo;
+    }
+
+    public AmazonProductInfo getAmazonProductInfo()
+    {
+        return amazonProductInfo;
+    }
+
+    public WalmartProductInfo getWalmartProductInfo()
+    {
+        return walmartProductInfo;
     }
 }

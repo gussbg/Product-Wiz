@@ -1,8 +1,5 @@
 package gussproductions.reviewwiz;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
 import java.io.UnsupportedEncodingException;
 
 import java.net.URLDecoder;
@@ -24,8 +21,6 @@ import java.util.TreeMap;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 
 import org.apache.commons.codec.binary.Base64;
@@ -34,10 +29,9 @@ import org.apache.commons.codec.binary.Base64;
  * This class contains all the logic for signing requests
  * to the Amazon Product Advertising API.
  */
-public class SignedRequestsHelper {
-    /**
-     * All strings are handled as UTF-8
-     */
+public class AmazonRequestHelper {
+
+    // All strings are handled as UTF-8
     private static final String UTF8_CHARSET = "UTF-8";
 
     /**
@@ -73,7 +67,7 @@ public class SignedRequestsHelper {
      * @param awsAssociateTag   Your AWS Associate Tag
      * @param awsSecretKey      Your AWS Secret Key
      */
-    public static SignedRequestsHelper getInstance(
+    public static AmazonRequestHelper getInstance(
             String endpoint,
             String awsAccessKeyId,
             String awsAssociateTag,
@@ -89,7 +83,7 @@ public class SignedRequestsHelper {
         if (null == awsSecretKey || awsSecretKey.length() == 0)
         { throw new IllegalArgumentException("awsSecretKey is null or empty"); }
 
-        SignedRequestsHelper instance = new SignedRequestsHelper();
+        AmazonRequestHelper instance = new AmazonRequestHelper();
         instance.endpoint = endpoint.toLowerCase();
         instance.awsAccessKeyId = awsAccessKeyId;
         instance.awsAssociateTag = awsAssociateTag;
@@ -106,7 +100,7 @@ public class SignedRequestsHelper {
     /**
      * The construct is private since we'd rather use getInstance()
      */
-    private SignedRequestsHelper() {}
+    private AmazonRequestHelper() {}
 
     /**
      * This method signs requests in hashmap form. It returns a URL that should
@@ -184,7 +178,8 @@ public class SignedRequestsHelper {
      *
      * @return  ISO-8601 format timestamp.
      */
-    private String timestamp() {
+    private String timestamp()
+    {
         String timestamp = null;
         Calendar cal = Calendar.getInstance();
         DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -249,7 +244,7 @@ public class SignedRequestsHelper {
      * @return
      */
     private Map<String, String> createParameterMap(String queryString) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         String[] pairs = queryString.split("&");
 
         for (String pair: pairs) {
@@ -281,38 +276,6 @@ public class SignedRequestsHelper {
             }
         }
         return map;
-    }
-
-    /*
- * Utility function to fetch the response from the service and extract the
- * title from the XML.
- */
-    public static String fetchTitle(String requestURL) {
-        String title = null;
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(requestURL);
-            Node titleNode = doc.getElementsByTagName("Title").item(0);
-            title = titleNode.getTextContent();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return title;
-    }
-
-    public static String fetchReviewsURL(String requestURL) {
-        String reviewsURL = null;
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(requestURL);
-            Node reviewsURLNode = doc.getElementsByTagName("IFrameURL").item(0);
-            reviewsURL = reviewsURLNode.getTextContent();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return reviewsURL;
     }
 }
 
