@@ -1,10 +1,11 @@
 package gussproductions.reviewwiz;
 
-public class Product {
-
+public class Product
+{
     private CommonProductInfo commonProductInfo;
     private AmazonProductInfo amazonProductInfo;
     private WalmartProductInfo walmartProductInfo;
+    private ReviewStats reviewStats;
 
     public Product(CommonProductInfo commonProductInfo)
     {
@@ -19,6 +20,15 @@ public class Product {
     public void setWalmartProductInfo(WalmartProductInfo walmartProductInfo)
     {
         this.walmartProductInfo = walmartProductInfo;
+    }
+    public void setReviewStats(AmazonProductSearch amazonProductSearch)
+    {
+        reviewStats = amazonProductInfo.updateReviewStats(amazonProductSearch);
+    }
+
+    public ReviewStats getReviewStats()
+    {
+        return reviewStats;
     }
 
     public CommonProductInfo getCommonProductInfo()

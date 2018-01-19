@@ -19,6 +19,12 @@ public class ReviewStats
         this.amazonReviewURL = amazonReviewURL;
     }
 
+    public ReviewStats(Integer totalStars, Double averageRating)
+    {
+        this.totalStars    = totalStars;
+        this.averageRating = averageRating;
+    }
+
     private Double calcAverageRating()
     {
         return (numStars[0] * 1.0 + numStars[1] * 2.0 + numStars[2] * 3.0 + numStars[3] * 4.0 + numStars[4] * 5.0);

@@ -25,7 +25,7 @@ public class AmazonProductInfo
     private String asin;
     private String productURL;
     private BigDecimal price;
-    private ReviewStats reviewStats;
+
     private ArrayList<Review> reviews;
     private String curReviewPage;
     private int curPageNum;
@@ -39,8 +39,6 @@ public class AmazonProductInfo
         this.reviews = new ArrayList<>();
 
         curPageNum = 1;
-
-
     }
 
     public String getASIN()
@@ -58,16 +56,16 @@ public class AmazonProductInfo
         return price;
     }
 
-    public ReviewStats getReviewStats()
-    {
-        return reviewStats;
-    }
 
-    public void setReviewStats(AmazonProductSearch amazonProductSearch)
+    public ReviewStats updateReviewStats(AmazonProductSearch amazonProductSearch)
     {
-        this.reviewStats = amazonProductSearch.getReviewStats(asin);
+        ReviewStats reviewStats;
+
+        reviewStats = amazonProductSearch.getReviewStats(asin);
         curReviewPage = reviewStats.getAmazonReviewURL();
         parseReviewPage();
+
+        return reviewStats;
     }
 
     public void parseReviewPage()
@@ -76,46 +74,42 @@ public class AmazonProductInfo
         {
             Document reviewPage = Jsoup.connect(curReviewPage).ignoreHttpErrors(true).ignoreContentType(true).get();
 
-            Elements unparsedReviewTexts  = reviewPage.getElementsByClass("a-size-base review-text");
-            Elements unparsedReviewDates  = reviewPage.getElementsByClass("a-size-base a-color-secondary review-date");
-            Elements unparsedHelpfulVotes = reviewPage.getElementsByClass("review-votes");
-            Elements unparsedPageNums     = reviewPage.getElementsByClass("page-button");
-            Elements unparsedStarRatings  = reviewPage.getElementsByClass("a-section celwidget");
+            Elements unparsedReviewTexts = reviewPage.getElementsByClass("a-size-base review-text");
+            Elements unparsedPageNums    = reviewPage.getElementsByClass("page-button");
+            Elements unparsedReviews     = reviewPage.getElementsByClass("a-section celwidget");
 
             DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
-            ArrayList<String> reviewTexts     = new ArrayList<>();
-            ArrayList<Date> reviewDates       = new ArrayList<>();
-            ArrayList<Integer> helpfulVotes   = new ArrayList<>();
-            ArrayList<StarRating> starRatings = new ArrayList<>();
+            ArrayList<String>     reviewTexts  = new ArrayList<>();
+            ArrayList<String>     reviewTitles = new ArrayList<>();
+            ArrayList<Date>       reviewDates  = new ArrayList<>();
+            ArrayList<Integer>    helpfulVotes = new ArrayList<>();
+            ArrayList<StarRating> starRatings  = new ArrayList<>();
 
             for (Element unparsedReviewText : unparsedReviewTexts)
             {
                 reviewTexts.add(unparsedReviewText.text().replaceAll("\\<.*?\\>", ""));
             }
 
-            for (Element unparsedDate : unparsedReviewDates)
+            for (Element unparsedReview : unparsedReviews)
             {
-                try
-                {
-                    reviewDates.add(dateFormat.parse(unparsedDate.text().substring(3)));
-                }
-                catch (ParseException pe)
-                {
-                    pe.printStackTrace();
-                }
-            }
+                Element unparsedStarRating  = unparsedReview.getElementsByClass("a-row").first().getElementsByClass("a-link-normal").first();
+                Element unparsedReviewDate  = unparsedReview.getElementsByClass("a-size-base a-color-secondary review-date").first();
+                Element unparsedNumHelpful  = unparsedReview.getElementsByClass("review-votes").first();
+                Element unparsedReviewTitle = unparsedReview.getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold").first();
 
-            for (Element unparsedHelpfulVote : unparsedHelpfulVotes)
-            {
-                if (unparsedHelpfulVote.text().substring(0,3).equals("One"))
+                reviewTitles.add(unparsedReviewTitle.text());
+
+                starRatings.add(StarRating.valueOf(Integer.parseInt(unparsedStarRating.attr("title").substring(0,1))));
+
+                if (unparsedNumHelpful.text().substring(0,3).equals("One"))
                 {
                     helpfulVotes.add(1);
                 }
                 else
                 {
                     Pattern numHelpfulPattern = Pattern.compile("(.*?) people found this helpful");
-                    Matcher numHelpfulMatcher = numHelpfulPattern.matcher(unparsedHelpfulVote.text());
+                    Matcher numHelpfulMatcher = numHelpfulPattern.matcher(unparsedNumHelpful.text());
 
                     if (numHelpfulMatcher.find())
                     {
@@ -126,13 +120,18 @@ public class AmazonProductInfo
                         helpfulVotes.add(0);
                     }
                 }
+
+                try
+                {
+                    reviewDates.add(dateFormat.parse(unparsedReviewDate.text().substring(3)));
+                }
+                catch (ParseException pe)
+                {
+                    pe.printStackTrace();
+                }
             }
 
-            for (Element unparsedStarRating : unparsedStarRatings)
-            {
-               starRatings.add(StarRating.valueOf(Integer.parseInt(unparsedStarRating.getElementsByClass("a-row").first().getElementsByClass("a-link-normal").attr("title").substring(0,1))));
-            }
-
+            String prevReviewPage = curReviewPage;
 
             for (Element unparsedPageNum : unparsedPageNums)
             {
@@ -140,15 +139,16 @@ public class AmazonProductInfo
                 {
                     curReviewPage = unparsedPageNum.select("a").attr("abs:href");
                 }
-                else
-                {
-                    curReviewPage = null;
-                }
+            }
+
+            if (curReviewPage.equals(prevReviewPage))
+            {
+                curReviewPage = null;
             }
 
             for (int i = 0; i < reviewDates.size(); i++)
             {
-                reviews.add(new Review(reviewTexts.get(i), starRatings.get(i), reviewDates.get(i), helpfulVotes.get(i), NUM_UNHELPFUL));
+                reviews.add(new Review(reviewTitles.get(i), reviewTexts.get(i), starRatings.get(i), reviewDates.get(i), helpfulVotes.get(i), NUM_UNHELPFUL));
             }
 
             curPageNum++;

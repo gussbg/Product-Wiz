@@ -7,14 +7,16 @@ import java.util.Date;
 
 public class Review
 {
+    String reviewTitle;
     String reviewText;
     StarRating starRating;
     Date date;
     Integer numHelpful;
     Integer numUnhelpful;
 
-    public Review(String reviewText, StarRating starRating, Date date, Integer numHelpful, Integer numUnhelpful)
+    public Review(String reviewTitle, String reviewText, StarRating starRating, Date date, Integer numHelpful, Integer numUnhelpful)
     {
+        this.reviewTitle = reviewTitle;
         this.reviewText = reviewText;
         this.starRating = starRating;
         this.date = date;
