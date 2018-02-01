@@ -1,20 +1,14 @@
 package gussproductions.reviewwiz;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.UnsupportedEncodingException;
-
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -22,14 +16,13 @@ import java.util.TreeMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-
-import org.apache.commons.codec.binary.Base64;
-
 /**
  * This class contains all the logic for signing requests
  * to the Amazon Product Advertising API.
  */
-public class AmazonRequestHelper {
+public class AmazonRequestHelper
+{
+    private HashMap<String, String> requestParams;
 
     // All strings are handled as UTF-8
     private static final String UTF8_CHARSET = "UTF-8";
@@ -51,56 +44,74 @@ public class AmazonRequestHelper {
      */
     private static final String REQUEST_METHOD = "GET";
 
-    private String endpoint = null;
-    private String awsAccessKeyId = null;
-    private String awsAssociateTag = null;
-    private String awsSecretKey = null;
-
-    private SecretKeySpec secretKeySpec = null;
     private Mac mac = null;
 
-    /**
-     * You must provide the three values below to initialize the helper.
-     *
-     * @param endpoint          Destination for the requests.
-     * @param awsAccessKeyId    Your AWS Access Key ID
-     * @param awsAssociateTag   Your AWS Associate Tag
-     * @param awsSecretKey      Your AWS Secret Key
-     */
-    public static AmazonRequestHelper getInstance(
-            String endpoint,
-            String awsAccessKeyId,
-            String awsAssociateTag,
-            String awsSecretKey
-    ) throws IllegalArgumentException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
+    private AmazonRequestMode amazonRequestMode;
+
+
+
+
+    public AmazonRequestHelper(String searchID, AmazonRequestMode amazonRequestMode) throws IllegalArgumentException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
     {
-        if (null == endpoint || endpoint.length() == 0)
-        { throw new IllegalArgumentException("endpoint is null or empty"); }
-        if (null == awsAccessKeyId || awsAccessKeyId.length() == 0)
-        { throw new IllegalArgumentException("awsAccessKeyId is null or empty"); }
-        if (null == awsAssociateTag || awsAssociateTag.length() == 0)
-        { throw new IllegalArgumentException("awsAssociateTag is null or empty"); }
-        if (null == awsSecretKey || awsSecretKey.length() == 0)
-        { throw new IllegalArgumentException("awsSecretKey is null or empty"); }
+        final String        AWS_SECRET_KEY  = "V9ybVhcilaWjqDFixxvJMh+dKX+kevCY2kbZUdZR";
+        final byte[]        secretyKeyBytes = AWS_SECRET_KEY.getBytes(UTF8_CHARSET);
+        final SecretKeySpec secretKeySpec   = new SecretKeySpec(secretyKeyBytes, HMAC_SHA256_ALGORITHM);
 
-        AmazonRequestHelper instance = new AmazonRequestHelper();
-        instance.endpoint = endpoint.toLowerCase();
-        instance.awsAccessKeyId = awsAccessKeyId;
-        instance.awsAssociateTag = awsAssociateTag;
-        instance.awsSecretKey = awsSecretKey;
+        this.amazonRequestMode = amazonRequestMode;
+        mac                    = Mac.getInstance(HMAC_SHA256_ALGORITHM);
 
-        byte[] secretyKeyBytes = instance.awsSecretKey.getBytes(UTF8_CHARSET);
-        instance.secretKeySpec = new SecretKeySpec(secretyKeyBytes, HMAC_SHA256_ALGORITHM);
-        instance.mac = Mac.getInstance(HMAC_SHA256_ALGORITHM);
-        instance.mac.init(instance.secretKeySpec);
+        mac.init(secretKeySpec);
 
-        return instance;
+        setCommonRequestParams();
+
+        if (amazonRequestMode.equals(AmazonRequestMode.ITEM_SEARCH))
+        {
+            requestParams.put("Operation", "ItemSearch");
+            requestParams.put("Keywords", searchID);
+            requestParams.put("ResponseGroup", "Medium");
+            requestParams.put("SearchIndex", "All");
+        }
+        else if (amazonRequestMode.equals(AmazonRequestMode.ITEM_LOOKUP_REVIEWS))
+        {
+            requestParams.put("Operation", "ItemLookup");
+            requestParams.put("IdType", "ASIN");
+            requestParams.put("ItemId", searchID);
+            requestParams.put("ResponseGroup", "Reviews");
+        }
+        else if (amazonRequestMode.equals(AmazonRequestMode.ITEM_LOOKUP_INFO))
+        {
+            requestParams.put("Operation", "ItemLookup");
+            requestParams.put("IdType", "UPC");
+            requestParams.put("ItemId", searchID);
+            requestParams.put("ResponseGroup", "Medium");
+            requestParams.put("SearchIndex", "All");
+        }
+    }
+
+    public void setProductPageNum(Integer productPageNum)
+    {
+        if (amazonRequestMode.equals(AmazonRequestMode.ITEM_SEARCH))
+        {
+            requestParams.remove("ItemPage");
+            requestParams.put("ItemPage", productPageNum.toString());
+        }
     }
 
     /**
-     * The construct is private since we'd rather use getInstance()
+     * Sets the request parameters that are common to all Amazon Product Advertising API requests.
      */
-    private AmazonRequestHelper() {}
+    private void setCommonRequestParams()
+    {
+        final String AWS_ACCESS_KEY_ID = "AKIAJIZXWDXYYXTUYMYQ";
+        final String AWS_ASSOCIATE_TAG = "3997-6329-4456";
+
+        requestParams = new HashMap<>();
+        requestParams.put("Service", "AWSECommerceService");
+        requestParams.put("Version", "2013-08-01");
+        requestParams.put("Condition", "New");
+        requestParams.put("AWSAccessKeyId", AWS_ACCESS_KEY_ID);
+        requestParams.put("AssociateTag", AWS_ASSOCIATE_TAG);
+    }
 
     /**
      * This method signs requests in hashmap form. It returns a URL that should
@@ -108,50 +119,41 @@ public class AmazonRequestHelper {
      * any way, doing so will invalidate the signature and Amazon will reject
      * the request.
      */
-    public String sign(Map<String, String> params) {
+    public String getRequestURL()
+    {
+        final String ENDPOINT = "ecs.amazonaws.com";
+
+
         // Let's add the AWSAccessKeyId and Timestamp parameters to the request.
-        params.put("AWSAccessKeyId", this.awsAccessKeyId);
-        params.put("AssociateTag", this.awsAssociateTag);
-        params.put("Timestamp", this.timestamp());
+        requestParams.remove("Timestamp");
+        requestParams.put("Timestamp", timestamp());
 
         // The parameters need to be processed in lexicographical order, so we'll
         // use a TreeMap implementation for that.
-        SortedMap<String, String> sortedParamMap = new TreeMap<String, String>(params);
+        SortedMap<String, String> sortedParamMap = new TreeMap<String, String>(requestParams);
 
         // get the canonical form the query string
-        String canonicalQS = this.canonicalize(sortedParamMap);
+        String canonicalQS = RequestHelperTools.canonicalize(sortedParamMap);
 
         // create the string upon which the signature is calculated
         String toSign =
                 REQUEST_METHOD + "\n"
-                        + this.endpoint + "\n"
+                        + ENDPOINT + "\n"
                         + REQUEST_URI + "\n"
                         + canonicalQS;
 
         // get the signature
-        String hmac = this.hmac(toSign);
-        String sig = this.percentEncodeRfc3986(hmac);
+        String hmac = hmac(toSign);
+        String sig = RequestHelperTools.percentEncodeRfc3986(hmac);
 
         // construct the URL
         String url =
-                "http://" + this.endpoint + REQUEST_URI + "?" + canonicalQS + "&Signature=" + sig;
+                "http://" + ENDPOINT + REQUEST_URI + "?" + canonicalQS + "&Signature=" + sig;
 
         return url;
     }
 
-    /**
-     * This method signs requests in query-string form. It returns a URL that
-     * should be used to fetch the response. The URL returned should not be
-     * modified in any way, doing so will invalidate the signature and Amazon
-     * will reject the request.
-     */
-    public String sign(String queryString) {
-        // let's break the query string into it's constituent name-value pairs
-        Map<String, String> params = this.createParameterMap(queryString);
 
-        // then we can sign the request as before
-        return this.sign(params);
-    }
 
     /**
      * Compute the HMAC.
@@ -160,7 +162,7 @@ public class AmazonRequestHelper {
      * @return              base64-encoded hmac value.
      */
     private String hmac(String stringToSign) {
-        String signature = null;
+        String signature;
         byte[] data;
         byte[] rawHmac;
         try {
@@ -180,102 +182,12 @@ public class AmazonRequestHelper {
      */
     private String timestamp()
     {
-        String timestamp = null;
+        String timestamp;
         Calendar cal = Calendar.getInstance();
         DateFormat dfm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         dfm.setTimeZone(TimeZone.getTimeZone("GMT"));
         timestamp = dfm.format(cal.getTime());
         return timestamp;
-    }
-
-    /**
-     * Canonicalize the query string as required by Amazon.
-     *
-     * @param sortedParamMap    Parameter name-value pairs in lexicographical order.
-     * @return                  Canonical form of query string.
-     */
-    private String canonicalize(SortedMap<String, String> sortedParamMap) {
-        if (sortedParamMap.isEmpty()) {
-            return "";
-        }
-
-        StringBuffer buffer = new StringBuffer();
-        Iterator<Map.Entry<String, String>> iter = sortedParamMap.entrySet().iterator();
-
-        while (iter.hasNext()) {
-            Map.Entry<String, String> kvpair = iter.next();
-            buffer.append(percentEncodeRfc3986(kvpair.getKey()));
-            buffer.append("=");
-            buffer.append(percentEncodeRfc3986(kvpair.getValue()));
-            if (iter.hasNext()) {
-                buffer.append("&");
-            }
-        }
-        String cannoical = buffer.toString();
-        return cannoical;
-    }
-
-    /**
-     * Percent-encode values according the RFC 3986. The built-in Java
-     * URLEncoder does not encode according to the RFC, so we make the
-     * extra replacements.
-     *
-     * @param s decoded string
-     * @return  encoded string per RFC 3986
-     */
-    private String percentEncodeRfc3986(String s) {
-        String out;
-        try {
-            out = URLEncoder.encode(s, UTF8_CHARSET)
-                    .replace("+", "%20")
-                    .replace("*", "%2A")
-                    .replace("%7E", "~");
-        } catch (UnsupportedEncodingException e) {
-            out = s;
-        }
-        return out;
-    }
-
-    /**
-     * Takes a query string, separates the constituent name-value pairs
-     * and stores them in a hashmap.
-     *
-     * @param queryString
-     * @return
-     */
-    private Map<String, String> createParameterMap(String queryString) {
-        Map<String, String> map = new HashMap<>();
-        String[] pairs = queryString.split("&");
-
-        for (String pair: pairs) {
-            if (pair.length() < 1) {
-                continue;
-            }
-
-            String[] tokens = pair.split("=",2);
-            for(int j=0; j<tokens.length; j++)
-            {
-                try {
-                    tokens[j] = URLDecoder.decode(tokens[j], UTF8_CHARSET);
-                } catch (UnsupportedEncodingException e) {
-                }
-            }
-            switch (tokens.length) {
-                case 1: {
-                    if (pair.charAt(0) == '=') {
-                        map.put("", tokens[0]);
-                    } else {
-                        map.put(tokens[0], "");
-                    }
-                    break;
-                }
-                case 2: {
-                    map.put(tokens[0], tokens[1]);
-                    break;
-                }
-            }
-        }
-        return map;
     }
 }
 

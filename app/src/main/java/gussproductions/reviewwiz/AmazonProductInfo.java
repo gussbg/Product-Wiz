@@ -1,161 +1,241 @@
 package gussproductions.reviewwiz;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import org.jsoup.nodes.Element;
-
 /**
  * Created by Brendon on 1/8/2018.
  */
 
-public class AmazonProductInfo
+public class AmazonProductInfo extends ProductInfo
 {
-    private String asin;
-    private String productURL;
-    private BigDecimal price;
-
-    private ArrayList<Review> reviews;
-    private String curReviewPage;
-    private int curPageNum;
-    private final int NUM_UNHELPFUL = 0;
-
-    public AmazonProductInfo(String asin, String productURL, BigDecimal price)
+    AmazonProductInfo(String upc)
     {
-        this.asin = asin;
-        this.productURL = productURL;
-        this.price = price;
-        this.reviews = new ArrayList<>();
+        curReviewPageNum = 1;
 
-        curPageNum = 1;
+        try
+        {
+            AmazonRequestHelper amazonRequestHelper = new AmazonRequestHelper(upc, AmazonRequestMode.ITEM_LOOKUP_INFO);
+
+            String requestURL = amazonRequestHelper.getRequestURL();
+            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+            Element  unparsedProduct = productResultPage.getElementsByTag("Item").first();
+
+            if (unparsedProduct != null)
+            {
+                setProductInfo(unparsedProduct);
+            }
+            else
+            {
+                hasInfo = false;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
-    public String getASIN()
+    AmazonProductInfo(Element unparsedProduct)
     {
-        return asin;
+        curReviewPageNum = 1;
+
+        setProductInfo(unparsedProduct);
     }
 
-    public String getProductURL()
+    private void setProductInfo(Element unparsedProduct)
     {
-        return productURL;
+        String unparsedPrice = unparsedProduct.getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
+
+        itemID      = unparsedProduct.getElementsByTag("ASIN").text();
+        price       = new BigDecimal(unparsedPrice);
+        title       = unparsedProduct.getElementsByTag("Title").text();
+        description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text();
+        productURL  = unparsedProduct.getElementsByTag("DetailPageURL").text();
+        imageURL    = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
+        reviews     = new ArrayList<>();
+        hasInfo     = true;
     }
 
-    public BigDecimal getPrice()
+    void setReviewStats()
     {
-        return price;
+        String reviewIframe;
+        String reviewURL = null;
+        Document reviewIFrame;
+        Element unparsedReviewStats = null;
+        int totalNumReviews = 0;
+        Integer[] numStars;
+
+        reviewIframe = getReviewIFrame(itemID);
+        numStars = new Integer[5];
+
+        try
+        {
+            reviewIFrame = Jsoup.connect(reviewIframe).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+            unparsedReviewStats = reviewIFrame.getElementsByClass("crIFrameHeaderHistogram").first();
+
+            if (unparsedReviewStats == null)
+            {
+                reviewStats = null;
+                curReviewURL = null;
+            }
+            else
+            {
+                reviewURL = reviewIFrame.getElementsByClass("asinReviewsSummary").select("a").attr("abs:href");
+
+                Pattern numReviewsPattern = Pattern.compile("(.*?) Review(|s)");
+                Pattern numReviewsStarsPattern = Pattern.compile(" star (.*?)%");
+
+                Matcher numReviewsMatcher = numReviewsPattern.matcher(unparsedReviewStats.text());
+                Matcher numReviewsStarsMatcher = numReviewsStarsPattern.matcher(unparsedReviewStats.text());
+
+                if (numReviewsMatcher.find())
+                {
+                    totalNumReviews = Integer.parseInt(numReviewsMatcher.group(1).replace(",", ""));
+                }
+
+                for (int i = 0; i < numStars.length && numReviewsStarsMatcher.find(); i++)
+                {
+                    numStars[i] = (int) Math.round((Double.parseDouble(numReviewsStarsMatcher.group(1)) / 100.0) * totalNumReviews);
+                }
+
+                curReviewURL = reviewURL;
+
+                reviewStats = new ReviewStats(numStars);
+            }
+        }
+
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
+
+
+
+
     }
 
-
-    public ReviewStats updateReviewStats(AmazonProductSearch amazonProductSearch)
+    /**
+     * A helper method for getReviewStats that returns a product's review URL.
+     *
+     * @param asin The ASIN of the product.
+     * @return The review URL.
+     */
+    private String getReviewIFrame(String asin)
     {
-        ReviewStats reviewStats;
+        String reviewURL = null;
+        String responseURL;
 
-        reviewStats = amazonProductSearch.getReviewStats(asin);
-        curReviewPage = reviewStats.getAmazonReviewURL();
-        parseReviewPage();
+        Document reviewResultsPage;
 
-        return reviewStats;
+        try
+        {
+            AmazonRequestHelper requestHelper = new AmazonRequestHelper(asin, AmazonRequestMode.ITEM_LOOKUP_REVIEWS);
+            responseURL = requestHelper.getRequestURL();
+            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+            reviewURL = reviewResultsPage.getElementsByTag("IFrameURL").text();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return reviewURL;
     }
 
     public void parseReviewPage()
     {
-        try
+        if (curReviewURL == null)
         {
-            Document reviewPage = Jsoup.connect(curReviewPage).ignoreHttpErrors(true).ignoreContentType(true).get();
-
-            Elements unparsedReviewTexts = reviewPage.getElementsByClass("a-size-base review-text");
-            Elements unparsedPageNums    = reviewPage.getElementsByClass("page-button");
-            Elements unparsedReviews     = reviewPage.getElementsByClass("a-section celwidget");
-
-            DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
-
-            ArrayList<String>     reviewTexts  = new ArrayList<>();
-            ArrayList<String>     reviewTitles = new ArrayList<>();
-            ArrayList<Date>       reviewDates  = new ArrayList<>();
-            ArrayList<Integer>    helpfulVotes = new ArrayList<>();
-            ArrayList<StarRating> starRatings  = new ArrayList<>();
-
-            for (Element unparsedReviewText : unparsedReviewTexts)
+            reviews = null;
+        }
+        else
+        {
+            try
             {
-                reviewTexts.add(unparsedReviewText.text().replaceAll("\\<.*?\\>", ""));
-            }
+                Document reviewPage = Jsoup.connect(curReviewURL).ignoreHttpErrors(true).ignoreContentType(true).get();
 
-            for (Element unparsedReview : unparsedReviews)
-            {
-                Element unparsedStarRating  = unparsedReview.getElementsByClass("a-row").first().getElementsByClass("a-link-normal").first();
-                Element unparsedReviewDate  = unparsedReview.getElementsByClass("a-size-base a-color-secondary review-date").first();
-                Element unparsedNumHelpful  = unparsedReview.getElementsByClass("review-votes").first();
-                Element unparsedReviewTitle = unparsedReview.getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold").first();
+                Elements unparsedPageNums = reviewPage.getElementsByClass("page-button");
+                Elements unparsedReviews = reviewPage.getElementsByClass("a-section celwidget");
 
-                reviewTitles.add(unparsedReviewTitle.text());
+                DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
-                starRatings.add(StarRating.valueOf(Integer.parseInt(unparsedStarRating.attr("title").substring(0,1))));
-
-                if (unparsedNumHelpful.text().substring(0,3).equals("One"))
+                for (Element unparsedReview : unparsedReviews)
                 {
-                    helpfulVotes.add(1);
-                }
-                else
-                {
-                    Pattern numHelpfulPattern = Pattern.compile("(.*?) people found this helpful");
-                    Matcher numHelpfulMatcher = numHelpfulPattern.matcher(unparsedNumHelpful.text());
+                    Integer numHelpful = 0;
+                    Date reviewDate = new Date();
+                    String reviewTitle = unparsedReview.getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold").first().text();
+                    StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByClass("a-row").first().getElementsByClass("a-link-normal").first().attr("title").substring(0, 1)));
+                    String reviewText = unparsedReview.getElementsByClass("a-size-base review-text").first().text().replaceAll("\\<.*?\\>", "");
 
-                    if (numHelpfulMatcher.find())
+                    Element unparsedNumHelpful = unparsedReview.getElementsByClass("review-votes").first();
+
+                    try
                     {
-                        helpfulVotes.add(Integer.parseInt(numHelpfulMatcher.group(1).replace(",", "")));
+                        reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("a-size-base a-color-secondary review-date").first().text().substring(3));
+                    }
+                    catch (ParseException pe)
+                    {
+                        pe.printStackTrace();
+                    }
+
+                    if (unparsedNumHelpful == null)
+                    {
+                        numHelpful = DEFAULT_HELPFUL_NUM;
+                    }
+                    else if (unparsedNumHelpful.text().substring(0, 3).equals("One"))
+                    {
+                        numHelpful = 1;
                     }
                     else
                     {
-                        helpfulVotes.add(0);
+                        Pattern numHelpfulPattern = Pattern.compile("(.*?) people found this helpful");
+                        Matcher numHelpfulMatcher = numHelpfulPattern.matcher(unparsedNumHelpful.text());
+
+                        if (numHelpfulMatcher.find())
+                        {
+                            numHelpful = Integer.parseInt(numHelpfulMatcher.group(1).replace(",", ""));
+                        }
+                    }
+
+                    reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, DEFAULT_UNHELPFUL_NUM));
+                }
+
+                String prevReviewPage = curReviewURL;
+
+                for (Element unparsedPageNum : unparsedPageNums)
+                {
+                    if (Integer.parseInt(unparsedPageNum.text().replace(",", "")) == curReviewPageNum + 1)
+                    {
+                        curReviewURL = unparsedPageNum.select("a").attr("abs:href");
                     }
                 }
 
-                try
+                if (curReviewURL.equals(prevReviewPage))
                 {
-                    reviewDates.add(dateFormat.parse(unparsedReviewDate.text().substring(3)));
+                    curReviewURL = null;
                 }
-                catch (ParseException pe)
-                {
-                    pe.printStackTrace();
-                }
+
+                curReviewPageNum++;
             }
-
-            String prevReviewPage = curReviewPage;
-
-            for (Element unparsedPageNum : unparsedPageNums)
+            catch (IOException ioe)
             {
-                if (Integer.parseInt(unparsedPageNum.text().replace(",", "")) == curPageNum + 1)
-                {
-                    curReviewPage = unparsedPageNum.select("a").attr("abs:href");
-                }
+                ioe.printStackTrace();
             }
-
-            if (curReviewPage.equals(prevReviewPage))
-            {
-                curReviewPage = null;
-            }
-
-            for (int i = 0; i < reviewDates.size(); i++)
-            {
-                reviews.add(new Review(reviewTitles.get(i), reviewTexts.get(i), starRatings.get(i), reviewDates.get(i), helpfulVotes.get(i), NUM_UNHELPFUL));
-            }
-
-            curPageNum++;
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
         }
     }
 }

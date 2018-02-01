@@ -13,20 +13,11 @@ import java.util.ArrayList;
  * Created by Brendon on 1/8/2018.
  */
 
-public class WalmartProductInfo
+public class WalmartProductInfo extends ProductInfo
 {
-    private BigDecimal price;
-    private String itemID;
-    private String productURL;
-    private ReviewStats reviewStats;
-    private ArrayList<Review> reviews;
-    private String curReviewURL;
-    private int curReviewPageNum;
-
     WalmartProductInfo(String upc)
     {
         WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(upc);
-        reviews = new ArrayList<>();
 
         String requestURL = walmartRequestHelper.getRequestURL();
 
@@ -35,92 +26,88 @@ public class WalmartProductInfo
             Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
             Element unparsedProduct = productResultPage.select("item").first();
 
-            price = new BigDecimal(unparsedProduct.getElementsByTag("salePrice").text().replaceAll(",", ""));
-            itemID = unparsedProduct.getElementsByTag("itemId").text();
-            productURL = unparsedProduct.getElementsByTag("productUrl").text();
+            if (unparsedProduct != null)
+            {
+                itemID      = unparsedProduct.getElementsByTag("itemId").text();
+                price       = new BigDecimal(unparsedProduct.getElementsByTag("salePrice").text().replaceAll(",", ""));
+                title       = unparsedProduct.getElementsByTag("name").text();
+                description = unparsedProduct.getElementsByTag("shortDescription").text();
+                productURL  = unparsedProduct.getElementsByTag("productUrl").text();
+                imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
+                reviews     = new ArrayList<>();
+                hasInfo     = true;
+
+                setReviewStats();
+            }
+            else
+            {
+                hasInfo = false;
+            }
         }
         catch (IOException ioe)
         {
             ioe.printStackTrace();
         }
-
-        setReviewStats();
-        parseReviewPage();
     }
 
-    public void setReviewStats()
+    private void setReviewStats()
     {
-        curReviewPageNum = 1;
-        WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(itemID, curReviewPageNum);
-
-        curReviewURL = walmartRequestHelper.getRequestURL();
-
-        Integer numStars[] = new Integer[5];
-
-        try
+        if (hasInfo)
         {
-            Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            Elements unparsedRatingCounts = reviewResultPage.getElementsByTag("count");
-
-            for (int i = 0; i < unparsedRatingCounts.size(); i++)
-            {
-                numStars[i] = Integer.parseInt(unparsedRatingCounts.get(i).text());
-            }
-
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
-
-        reviewStats = new ReviewStats(numStars, null);
-    }
-
-    public void parseReviewPage()
-    {
-        try
-        {
-            Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            Elements unparsedReviews  = reviewResultPage.getElementsByTag("review");
-
-            for (Element unparsedReview : unparsedReviews)
-            {
-                String     reviewTitle  = unparsedReview.getElementsByTag("title").text();
-                String     reviewText   = unparsedReview.getElementsByTag("reviewText").text();
-                StarRating starRating   = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByTag("rating").text()));
-                Integer    numHelpful   = Integer.parseInt(unparsedReview.getElementsByTag("upVotes").text());
-                Integer    numUnhelpful = Integer.parseInt(unparsedReview.getElementsByTag("downVotes").text());
-
-                reviews.add(new Review(reviewTitle, reviewText, starRating, null, numHelpful, numUnhelpful));
-            }
-
-            curReviewPageNum++;
+            curReviewPageNum = 1;
             WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(itemID, curReviewPageNum);
+
             curReviewURL = walmartRequestHelper.getRequestURL();
+
+            Integer numStars[] = new Integer[5];
+
+            try {
+                Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                Elements unparsedRatings = reviewResultPage.getElementsByTag("ratingCounts");
+
+                for (int i = 0; i < unparsedRatings.size(); i++) {
+                    String unparsedRatingCount = unparsedRatings.get(i).getElementsByTag("count").text();
+
+                    if (!unparsedRatingCount.equals("")) {
+                        numStars[i] = Integer.parseInt(unparsedRatings.get(i).text());
+                    } else {
+
+                        numStars[i] = 0;
+                    }
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+
+            reviewStats = new ReviewStats(numStars);
         }
-        catch (IOException ioe)
+    }
+
+    public void parseReviewPage() {
+        if (hasInfo)
         {
-            ioe.printStackTrace();
+            try
+            {
+                Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                Elements unparsedReviews = reviewResultPage.getElementsByTag("review");
+
+                for (Element unparsedReview : unparsedReviews)
+                {
+                    String reviewTitle = unparsedReview.getElementsByTag("title").text();
+                    String reviewText = unparsedReview.getElementsByTag("reviewText").text();
+                    StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByTag("rating").text()));
+                    Integer numHelpful = Integer.parseInt(unparsedReview.getElementsByTag("upVotes").text());
+                    Integer numUnhelpful = Integer.parseInt(unparsedReview.getElementsByTag("downVotes").text());
+
+                    reviews.add(new Review(reviewTitle, reviewText, starRating, null, numHelpful, numUnhelpful));
+                }
+
+                curReviewPageNum++;
+                WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(itemID, curReviewPageNum);
+                curReviewURL = walmartRequestHelper.getRequestURL();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
         }
-    }
-
-    public ReviewStats getReviewStats()
-    {
-        return reviewStats;
-    }
-
-    public BigDecimal getPrice()
-    {
-        return price;
-    }
-
-    public String getItemID()
-    {
-        return itemID;
-    }
-
-    public String getProductURL()
-    {
-        return productURL;
     }
 }

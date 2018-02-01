@@ -13,27 +13,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Brendon on 1/17/2018.
  */
 
-public class BestbuyProductInfo
+class BestbuyProductInfo extends ProductInfo
 {
-    private BigDecimal        price;
-    private String            sku;
-    private String            productURL;
-    private String            title;
-    private String            imageURL;
-    private String            description;
-    private ReviewStats       reviewStats;
-    private ArrayList<Review> reviews;
-    private String            baseReviewURL;
-    private String            curReviewURL;
-    private int               curReviewPageNum;
-    private boolean           hasInfo;
+    private String baseReviewURL;
 
-    public BestbuyProductInfo(String upc)
+    BestbuyProductInfo(String upc)
     {
         BestbuyRequestHelper bestbuyRequestHelper = new BestbuyRequestHelper(upc);
         curReviewPageNum = 0;
@@ -51,7 +42,7 @@ public class BestbuyProductInfo
                 Double  averageStarRating;
 
                 price             = new BigDecimal(unparsedProduct.getElementsByTag("salePrice").text().replaceAll(",", ""));
-                sku               = unparsedProduct.getElementsByTag("sku").text();
+                itemID            = unparsedProduct.getElementsByTag("sku").text();
                 productURL        = unparsedProduct.getElementsByTag("url").text();
                 title             = unparsedProduct.getElementsByTag("name").text();
                 imageURL          = unparsedProduct.getElementsByTag("image").text();
@@ -75,107 +66,75 @@ public class BestbuyProductInfo
 
     public void parseReviewPage()
     {
-        setReviewPage();
+        if (hasInfo) {
+            setReviewPage();
 
-        DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+            DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
-        try
-        {
-            Document reviewPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            Elements unparsedReviews = reviewPage.getElementsByClass("review-item-feedback");
+            Pattern numHelpfulPattern = Pattern.compile("Helpful \\((.*?)\\)");
+            Pattern numUnhelpfulPattern = Pattern.compile("Unhelpful \\((.*?)\\)");
 
-            for (Element unparsedReview : unparsedReviews)
-            {
-                Date       reviewDate   = new Date();
-                String     reviewTitle  = unparsedReview.getElementsByClass("col-md-9 col-sm-9 col-xs-12 title").text();
-                String     reviewText   = unparsedReview.getElementsByClass("pre-white-space").text();
-                StarRating starRating   = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByClass("reviewer-score").text()));
-                Integer    numHelpful   = Integer.parseInt(unparsedReview.getElementsByClass("pos-display").text());
-                Integer    numUnhelpful = Integer.parseInt(unparsedReview.getElementsByClass("neg-display").text());
+            Matcher numHelpfulMatcher;
+            Matcher numUnhelpfulMatcher;
 
-                try
-                {
-                    reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("review-date").text());
+
+            try {
+                Document reviewPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                Elements unparsedReviews = reviewPage.getElementsByClass("review-item-feedback");
+
+                for (Element unparsedReview : unparsedReviews) {
+                    Date reviewDate = new Date();
+                    String reviewTitle = unparsedReview.getElementsByClass("col-md-9 col-sm-9 col-xs-12 title").text();
+                    String reviewText = unparsedReview.getElementsByClass("pre-white-space").text();
+                    StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByClass("c-review-average").text()));
+
+
+                    Integer numHelpful = DEFAULT_HELPFUL_NUM;
+                    Integer numUnhelpful = DEFAULT_UNHELPFUL_NUM;
+
+                    numHelpfulMatcher = numHelpfulPattern.matcher(unparsedReview.getElementsByClass("pos-feedback no-margin-l false").text());
+                    numUnhelpfulMatcher = numUnhelpfulPattern.matcher(unparsedReview.getElementsByClass("pos-feedback no-margin-l false").text());
+
+                    if (numHelpfulMatcher.find()) {
+                        numHelpful = Integer.parseInt(numHelpfulMatcher.group(1).replace(",", ""));
+                    }
+
+                    if (numUnhelpfulMatcher.find()) {
+                        numUnhelpful = Integer.parseInt(numUnhelpfulMatcher.group(1).replace(",", ""));
+                    }
+
+                    try {
+                        reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("review-date").text());
+                    } catch (ParseException pe) {
+                        pe.printStackTrace();
+                    }
+
+                    reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful));
                 }
-                catch (ParseException pe)
-                {
-                    pe.printStackTrace();
-                }
-
-                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful));
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
         }
     }
 
     private void setReviewPage()
     {
-        curReviewPageNum++;
+        if (hasInfo) {
+            curReviewPageNum++;
 
-        if (curReviewPageNum == 1)
-        {
-            try
-            {
-                Document productPage = Jsoup.connect(productURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-                Element  unparsedReviewURL = productPage.getElementsByClass("see-all-reviews-button-container").first().getElementsByClass("btn btn-default ").first();
+            if (curReviewPageNum == 1) {
+                try {
+                    Document productPage = Jsoup.connect(productURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                    Element unparsedReviewURL = productPage.getElementsByClass("see-all-reviews-button-container").first().getElementsByClass("btn btn-default ").first();
 
-                baseReviewURL = unparsedReviewURL.attr("href");
-                curReviewURL = baseReviewURL + "?page=1";
-
-                System.out.println(curReviewURL);
-            }
-            catch (IOException ioe)
-            {
-                ioe.printStackTrace();
+                    baseReviewURL = unparsedReviewURL.attr("href");
+                    curReviewURL = baseReviewURL + "?page=1";
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            } else {
+                curReviewURL = baseReviewURL + "?page=" + curReviewPageNum;
             }
         }
-        else
-        {
-            curReviewURL = baseReviewURL + "?page=" + curReviewPageNum;
-        }
-
-    }
-
-    public BigDecimal getPrice()
-    {
-        return price;
-    }
-
-    public String getSku()
-    {
-        return sku;
-    }
-
-    public String getProductURL()
-    {
-        return productURL;
-    }
-
-    public String getTitle()
-    {
-        return title;
-    }
-
-    public String getImageURL()
-    {
-        return imageURL;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public ReviewStats getReviewStats()
-    {
-        return reviewStats;
-    }
-
-    public boolean hasInfo()
-    {
-        return hasInfo;
     }
 }

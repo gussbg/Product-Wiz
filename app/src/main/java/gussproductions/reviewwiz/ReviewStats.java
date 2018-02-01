@@ -9,17 +9,15 @@ public class ReviewStats
     private Integer[] numStars;
     private Integer totalStars = 0;
     private Double averageRating;
-    private String amazonReviewURL;
 
-    public ReviewStats(Integer numStars[], String amazonReviewURL)
+    ReviewStats(Integer numStars[])
     {
         this.numStars = numStars;
         this.totalStars = calcTotalStars();
         this.averageRating = calcAverageRating();
-        this.amazonReviewURL = amazonReviewURL;
     }
 
-    public ReviewStats(Integer totalStars, Double averageRating)
+    ReviewStats(Integer totalStars, Double averageRating)
     {
         this.totalStars    = totalStars;
         this.averageRating = averageRating;
@@ -34,7 +32,7 @@ public class ReviewStats
     {
         for (Integer integer : numStars)
         {
-            totalStars += integer;
+            totalStars += 1;
         }
 
         return totalStars;
@@ -97,10 +95,5 @@ public class ReviewStats
     public Double getAverageRating()
     {
         return averageRating;
-    }
-
-    public String getAmazonReviewURL()
-    {
-        return amazonReviewURL;
     }
 }

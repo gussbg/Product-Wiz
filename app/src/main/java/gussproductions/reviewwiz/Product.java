@@ -1,48 +1,31 @@
 package gussproductions.reviewwiz;
 
-public class Product
+class Product
 {
-    private CommonProductInfo commonProductInfo;
-    private AmazonProductInfo amazonProductInfo;
+    private String             upc;
+    private AmazonProductInfo  amazonProductInfo;
     private WalmartProductInfo walmartProductInfo;
-    private ReviewStats reviewStats;
+    private BestbuyProductInfo bestbuyProductInfo;
+    private EbayProductInfo    ebayProductInfo;
 
-    public Product(CommonProductInfo commonProductInfo)
+    Product(AmazonProductInfo amazonProductInfo, String upc)
     {
-        this.commonProductInfo = commonProductInfo;
-    }
+        this.upc = upc;
 
-    public void setAmazonProductInfo(AmazonProductInfo amazonProductInfo)
-    {
         this.amazonProductInfo = amazonProductInfo;
+        this.walmartProductInfo = new WalmartProductInfo(upc);
+        this.bestbuyProductInfo = new BestbuyProductInfo(upc);
+        this.ebayProductInfo    = new EbayProductInfo(upc);
+
     }
 
-    public void setWalmartProductInfo(WalmartProductInfo walmartProductInfo)
-    {
-        this.walmartProductInfo = walmartProductInfo;
-    }
-    public void setReviewStats(AmazonProductSearch amazonProductSearch)
-    {
-        reviewStats = amazonProductInfo.updateReviewStats(amazonProductSearch);
-    }
-
-    public ReviewStats getReviewStats()
-    {
-        return reviewStats;
-    }
-
-    public CommonProductInfo getCommonProductInfo()
-    {
-        return commonProductInfo;
-    }
-
-    public AmazonProductInfo getAmazonProductInfo()
-    {
-        return amazonProductInfo;
-    }
-
-    public WalmartProductInfo getWalmartProductInfo()
+    String             getUPC()                { return upc; }
+    AmazonProductInfo  getAmazonProductInfo()  { return amazonProductInfo; }
+    WalmartProductInfo getWalmartProductInfo()
     {
         return walmartProductInfo;
     }
+    BestbuyProductInfo getBestbuyProductInfo() { return bestbuyProductInfo; }
+    EbayProductInfo    getEbayProductInfo()    { return ebayProductInfo; }
+
 }

@@ -1,24 +1,19 @@
 /*
- * Copyright (c) 2017, Brendon Guss. All rights reserved.
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
  */
 
 package gussproductions.reviewwiz;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /*
  * Jsoup is used for parsing Product and review information from the Amazon Product Advertising API
  * responses.
  */
-import org.jsoup.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
 
 
 /**
@@ -27,37 +22,30 @@ import org.jsoup.select.Elements;
  * set of Products. It can also grab review statics for a given ASIN.
  *
  * @author Brendon Guss
- * @since 01/03/2018
+ * @since  01/03/2018
  */
 class AmazonProductSearch
 {
-    private final int PRODUCTS_PER_PAGE = 10;
-
-    private ArrayList<Product> productSet;
     private AmazonRequestHelper requestHelper;
-    private HashMap<String, String> requestParams;
     private Integer totalPages;
     private String responseURL;
     private int totalProductsParsed;
+    private boolean hasProducts;
 
     // Given a string of keywords, a ProductSet is generated.
     AmazonProductSearch(String searchText)
     {
         // Amazon Advertising API credentials.
-        final String AWS_ACCESS_KEY_ID = "AKIAJIZXWDXYYXTUYMYQ";
-        final String AWS_ASSOCIATE_TAG = "3997-6329-4456";
-        final String AWS_SECRET_KEY = "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";
-        final String ENDPOINT = "ecs.amazonaws.com";
+
         final String ITEM_KEYWORDS;
 
         ITEM_KEYWORDS = searchText;
         totalProductsParsed = 0;
         responseURL = null;
-        productSet = new ArrayList<>();
 
         try
         {
-            requestHelper = AmazonRequestHelper.getInstance(ENDPOINT, AWS_ACCESS_KEY_ID, AWS_ASSOCIATE_TAG, AWS_SECRET_KEY);
+            requestHelper = new AmazonRequestHelper(ITEM_KEYWORDS, AmazonRequestMode.ITEM_SEARCH);
         }
         catch (Exception e)
         {
@@ -65,18 +53,19 @@ class AmazonProductSearch
             return;
         }
 
-        setCommonRequestParams();
-
-        requestParams.put("Operation", "ItemSearch");
-        requestParams.put("Keywords", ITEM_KEYWORDS);
-        requestParams.put("ResponseGroup", "Medium");
-        requestParams.put("SearchIndex","All");
 
         // The requestHelper generates the responseURL which links to XML data that is later parsed.
-        responseURL = requestHelper.sign(requestParams);
+        responseURL = requestHelper.getRequestURL();
 
-        calcTotalPages();
-        parseProducts(PRODUCTS_PER_PAGE);
+        if (!responseURL.equals(""))
+        {
+            hasProducts = true;
+            calcTotalPages();
+        }
+        else
+        {
+            hasProducts = false;
+        }
     }
 
     /**
@@ -85,57 +74,45 @@ class AmazonProductSearch
      *
      * @param numProductsToParse The number of products to parse and add to the productSet.
      */
-    private void parseProducts(int numProductsToParse)
+    ArrayList<Product> parseProducts(int numProductsToParse)
     {
-        int productsParsed = 0;
-
-        for (Integer productPageNum = totalProductsParsed / PRODUCTS_PER_PAGE + 1; productPageNum <= totalPages && productsParsed < numProductsToParse; productPageNum++)
+        if (hasProducts)
         {
-            try
-            {
-                requestParams.remove("ItemPage");
-                requestParams.put("ItemPage", productPageNum.toString());
+            ArrayList<Product> productSet = new ArrayList<>();
+            int productsParsed = 0;
 
-                responseURL = requestHelper.sign(requestParams);
-                Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-                Elements unparsedProducts = productResultPage.select("Item");
+            final int PRODUCTS_PER_PAGE = 10;
 
-                for (int productIndex = totalProductsParsed % (PRODUCTS_PER_PAGE * productPageNum); productIndex < unparsedProducts.size() && productsParsed < numProductsToParse; productIndex++)//(Element unparsedProduct : unparsedProducts)
-                {
-                    if (unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").hasText())
-                    {
-                        String asin = unparsedProducts.get(productIndex).getElementsByTag("ASIN").text();
+            for (Integer productPageNum = totalProductsParsed / PRODUCTS_PER_PAGE + 1; productPageNum <= totalPages && productsParsed < numProductsToParse; productPageNum++) {
+                try {
+                    requestHelper.setProductPageNum(productPageNum);
+                    responseURL = requestHelper.getRequestURL();
+                    Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                    Elements unparsedProducts = productResultPage.select("Item");
 
-                        CommonProductInfo commonProductInfo =
-                                new CommonProductInfo(unparsedProducts.get(productIndex).getElementsByTag("ISBN").text(),
-                                                      unparsedProducts.get(productIndex).getElementsByTag("UPC").text(),
-                                                      unparsedProducts.get(productIndex).getElementsByTag("EAN").text(),
-                                                      unparsedProducts.get(productIndex).getElementsByTag("Title").text(),
-                                                      unparsedProducts.get(productIndex).getElementsByTag("EditorialReview").select("Content").text());
-                        AmazonProductInfo amazonProductInfo =
-                                new AmazonProductInfo(asin,
-                                        unparsedProducts.get(productIndex).getElementsByTag("DetailPageURL").text(),
-                                        new BigDecimal(unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "")));
+                    if (unparsedProducts != null) {
+                        for (int productIndex = totalProductsParsed % (PRODUCTS_PER_PAGE * productPageNum); productIndex < unparsedProducts.size() && productsParsed < numProductsToParse; productIndex++) {
+                            String unparsedPrice = unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
+                            String upc = unparsedProducts.get(productIndex).getElementsByTag("UPC").text();
 
-                        Product product = new Product(commonProductInfo);
-                        product.setAmazonProductInfo(amazonProductInfo);
+                            if (unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").hasText() && !unparsedPrice.contains("display") && !upc.equals("")) {
+                                Element unparsedProduct = unparsedProducts.get(productIndex);
+                                Product product = new Product(new AmazonProductInfo(unparsedProduct), upc);
+                                productSet.add(product);
 
-                        //System.out.println(unparsedProducts.get(productIndex).getElementsByTag("DetailPageURL").text());
-                        //System.out.println(getReviewIFrame(asin));
-
-                        //Document reviewResultsPage = Jsoup.connect("https://www.amazon.com/Apple-iPhone-GSM-Unlocked-32GB/dp/B01N9YOF3R").userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-
-                        productSet.add(product);
-
-                        productsParsed++;
+                                productsParsed++;
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+
+            return productSet;
         }
+
+        return null;
     }
 
     /**
@@ -144,127 +121,30 @@ class AmazonProductSearch
      */
     private void calcTotalPages()
     {
-        final int PRODUCT_PAGE_LIMIT = 5;
-        totalPages = 0;
-
-        try
+        if (hasProducts)
         {
-            Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            Element totalPagesElement = productResultPage.selectFirst("TotalPages");
-            totalPages = Integer.parseInt(totalPagesElement.text());
+            final int PRODUCT_PAGE_LIMIT = 5;
+            totalPages = 0;
+
+            try
+            {
+                Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+                Element totalPagesElement = productResultPage.selectFirst("TotalPages");
+                totalPages = Integer.parseInt(totalPagesElement.text());
 
             /*
              * The total number of product pages is often over 5, but 5 pages is the maximum
              * supported by the API.
              */
-            if (totalPages > PRODUCT_PAGE_LIMIT)
+                if (totalPages > PRODUCT_PAGE_LIMIT)
+                {
+                    totalPages = PRODUCT_PAGE_LIMIT;
+                }
+            }
+            catch (Exception e)
             {
-                totalPages = PRODUCT_PAGE_LIMIT;
+                e.printStackTrace();
             }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
-
-    ReviewStats getReviewStats(String asin)
-    {
-        String reviewIframe;
-        String reviewURL = null;
-        Document reviewIFrame;
-        String unparsedReviewStats;
-        int totalNumReviews = 0;
-        Integer[] numStars;
-
-        reviewIframe = getReviewIFrame(asin);
-        numStars = new Integer[5];
-
-        try
-        {
-            reviewIFrame = Jsoup.connect(reviewIframe).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            unparsedReviewStats = reviewIFrame.select("div.crIFrameHeaderHistogram:matches( Reviews)").first().text();
-
-            reviewURL = reviewIFrame.getElementsByClass("asinReviewsSummary").select("a").attr("abs:href");
-
-            //System.out.println(reviewURL);
-
-            Pattern numReviewsPattern = Pattern.compile("(.*?) Reviews");
-            Pattern numReviewsStarsPattern = Pattern.compile(" star (.*?)%");
-
-            Matcher numReviewsMatcher = numReviewsPattern.matcher(unparsedReviewStats);
-            Matcher numReviewsStarsMatcher = numReviewsStarsPattern.matcher(unparsedReviewStats);
-
-            if (numReviewsMatcher.find())
-            {
-                totalNumReviews = Integer.parseInt(numReviewsMatcher.group(1).replace(",", ""));
-            }
-
-            for (int i = 0; i < numStars.length && numReviewsStarsMatcher.find(); i++)
-            {
-                numStars[i] = (int) Math.round((Double.parseDouble(numReviewsStarsMatcher.group(1)) / 100.0) * totalNumReviews);
-            }
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
-
-        return new ReviewStats(numStars, reviewURL);
-    }
-
-    /**
-     * Sets the request parameters that are common to all Amazon Product Advertising API requests.
-     */
-    private void setCommonRequestParams()
-    {
-        requestParams = new HashMap<>();
-        requestParams.put("Service", "AWSECommerceService");
-        requestParams.put("Version", "2013-08-01");
-        requestParams.put("Condition", "New");
-    }
-
-    /**
-     * A helper method for getReviewStats that returns a product's review URL.
-     *
-     * @param asin The ASIN of the product.
-     * @return The review URL.
-     */
-    private String getReviewIFrame(String asin)
-    {
-        String reviewURL = null;
-
-        requestParams.remove("ResponseGroup");
-        requestParams.remove("Operation");
-        requestParams.remove("Keywords");
-        requestParams.remove("SearchIndex");
-        requestParams.put("ResponseGroup", "Reviews");
-        requestParams.put("Operation", "ItemLookup");
-
-        try
-        {
-            Document reviewResultsPage;
-
-            requestParams.remove("ItemId");
-            requestParams.put("ItemId", asin);
-
-            responseURL = requestHelper.sign(requestParams);
-
-            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            reviewURL = reviewResultsPage.getElementsByTag("IFrameURL").text();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return reviewURL;
-    }
-
-    public ArrayList<Product> getProductSet()
-    {
-        return productSet;
-    }
-
-
 }

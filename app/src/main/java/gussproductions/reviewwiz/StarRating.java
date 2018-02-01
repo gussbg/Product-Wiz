@@ -12,7 +12,7 @@ public enum StarRating
     ONE_STAR(1), TWO_STAR(2), THREE_STAR(3), FOUR_STAR(4), FIVE_STAR(5);
 
     private Integer value;
-    private static Map valueMap = new HashMap<>();
+    private static Map<Integer, StarRating> valueMap = new HashMap<>();
 
     StarRating(Integer value)
     {
@@ -29,7 +29,7 @@ public enum StarRating
 
     static StarRating valueOf(Integer starRating)
     {
-        return (StarRating) valueMap.get(starRating);
+        return valueMap.get(starRating);
     }
 
     Integer getValue()

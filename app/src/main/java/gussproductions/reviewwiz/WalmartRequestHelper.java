@@ -1,5 +1,9 @@
 package gussproductions.reviewwiz;
 
+import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * Created by Brendon on 1/8/2018.
  */
@@ -7,41 +11,52 @@ package gussproductions.reviewwiz;
 public class WalmartRequestHelper
 {
     private String requestURL;
-    final String COMMON_URL_PREFIX = "http://api.walmartlabs.com/v1/";
-    final String RESPONSE_FORMAT = "xml";
+    private HashMap<String, String> requestParams = new HashMap<>();
 
-    public WalmartRequestHelper (String upc)
+
+    private final String ENDPOINT = "http://api.walmartlabs.com/v1/";
+
+    WalmartRequestHelper (String upc)
     {
-        requestURL = COMMON_URL_PREFIX + "items";
-        setAPIKey();
-        setUPC(upc);
-        setResponseFormat(RESPONSE_FORMAT);
+        requestURL = ENDPOINT + "items?";
+
+        setCommonParams();
+
+        requestParams.put("upc", upc);
+
+        addQuery();
     }
 
-    public WalmartRequestHelper(String itemID, int reviewPageNum)
+    WalmartRequestHelper(String itemID, Integer reviewPageNum)
     {
-        requestURL = COMMON_URL_PREFIX + "reviews/";
+        requestURL = ENDPOINT + "reviews/";
+
         setItemID(itemID);
-        setAPIKey();
-        setReviewPageNum(reviewPageNum);
-        setResponseFormat(RESPONSE_FORMAT);
+
+        requestURL += "?";
+
+        setCommonParams();
+
+        requestParams.put("page", reviewPageNum.toString());
+
+        addQuery();
     }
 
-    private void setReviewPageNum(int reviewPageNum)
+    private void setCommonParams()
     {
-        requestURL += "&page=" + reviewPageNum;
+        final String RESPONSE_FORMAT = "xml";
+        final String API_KEY = "r9gupp7gu9kbbfyuzkgssbjy";
+
+        requestParams.put("apiKey", API_KEY);
+        requestParams.put("format", RESPONSE_FORMAT);
     }
 
-    private void setAPIKey()
+    private void addQuery()
     {
-        final String apiKey = "r9gupp7gu9kbbfyuzkgssbjy";
+        SortedMap<String, String> sortedParamMap = new TreeMap<>(requestParams);
+        String canonicalQS = RequestHelperTools.canonicalize(sortedParamMap);
 
-        requestURL += "?apiKey=" + apiKey;
-    }
-
-    private void setUPC(String upc)
-    {
-        requestURL += "&upc=" + upc;
+        requestURL += canonicalQS;
     }
 
     private void setItemID(String itemID)
@@ -49,15 +64,9 @@ public class WalmartRequestHelper
         requestURL += itemID;
     }
 
-    private void setResponseFormat(String format)
-    {
-        requestURL += "&format=" + format;
-    }
-
-    public String getRequestURL()
+    String getRequestURL()
     {
         return requestURL;
     }
-
 }
 
