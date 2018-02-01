@@ -16,6 +16,11 @@ class ProductSearch
     {
         amazonProductSearch = new AmazonProductSearch(searchText);
 
-        productSet = amazonProductSearch.parseProducts(10);
+        productSet = amazonProductSearch.parseProducts(100);
+    }
+
+    public ArrayList<Product> getProductSet()
+    {
+        return productSet;
     }
 }

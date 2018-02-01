@@ -22,7 +22,8 @@ import java.util.regex.Pattern;
 
 class BestbuyProductInfo extends ProductInfo
 {
-    private String baseReviewURL;
+    private String  baseReviewURL;
+    private boolean hasReviews;
 
     BestbuyProductInfo(String upc)
     {
@@ -38,6 +39,8 @@ class BestbuyProductInfo extends ProductInfo
             if (numResults == 1)
             {
                 Element unparsedProduct = productResultPage.getElementsByTag("product").first();
+                String unparsedNumReviews = unparsedProduct.getElementsByTag("customerReviewCount").text();
+                String unparsedAverageRating = unparsedProduct.getElementsByTag("customerReviewAverage").text();
                 Integer numReviews;
                 Double  averageStarRating;
 
@@ -47,15 +50,22 @@ class BestbuyProductInfo extends ProductInfo
                 title             = unparsedProduct.getElementsByTag("name").text();
                 imageURL          = unparsedProduct.getElementsByTag("image").text();
                 description       = unparsedProduct.getElementsByTag("longDescription").text();
-                numReviews        = Integer.parseInt(unparsedProduct.getElementsByTag("customerReviewCount").text());
-                averageStarRating = Double.parseDouble(unparsedProduct.getElementsByTag("customerReviewAverage").text());
-                reviewStats       = new ReviewStats(numReviews, averageStarRating);
-                hasInfo           = true;
-                reviews           = new ArrayList<>();
+                hasReviews        = !unparsedNumReviews.equals("") && !unparsedAverageRating.equals("");
+
+                if (hasReviews)
+                {
+                    numReviews        = Integer.parseInt(unparsedNumReviews);
+                    averageStarRating = Double.parseDouble(unparsedAverageRating);
+                    reviewStats       = new ReviewStats(numReviews, averageStarRating);
+                    reviews           = new ArrayList<>();
+                }
+
+                hasInfo = true;
             }
             else
             {
-                hasInfo = false;
+                hasInfo    = false;
+                hasReviews = false;
             }
         }
         catch (IOException ioe)
@@ -66,7 +76,8 @@ class BestbuyProductInfo extends ProductInfo
 
     public void parseReviewPage()
     {
-        if (hasInfo) {
+        if (hasInfo && hasReviews)
+        {
             setReviewPage();
 
             DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
@@ -119,7 +130,8 @@ class BestbuyProductInfo extends ProductInfo
 
     private void setReviewPage()
     {
-        if (hasInfo) {
+        if (hasInfo && hasReviews)
+        {
             curReviewPageNum++;
 
             if (curReviewPageNum == 1) {

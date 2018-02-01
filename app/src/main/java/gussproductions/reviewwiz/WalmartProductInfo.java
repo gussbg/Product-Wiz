@@ -28,16 +28,25 @@ public class WalmartProductInfo extends ProductInfo
 
             if (unparsedProduct != null)
             {
-                itemID      = unparsedProduct.getElementsByTag("itemId").text();
-                price       = new BigDecimal(unparsedProduct.getElementsByTag("salePrice").text().replaceAll(",", ""));
-                title       = unparsedProduct.getElementsByTag("name").text();
-                description = unparsedProduct.getElementsByTag("shortDescription").text();
-                productURL  = unparsedProduct.getElementsByTag("productUrl").text();
-                imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
-                reviews     = new ArrayList<>();
-                hasInfo     = true;
+                if (unparsedProduct.getElementsByTag("salePrice").hasText())
+                {
+                    itemID      = unparsedProduct.getElementsByTag("itemId").text();
+                    price       = new BigDecimal(unparsedProduct.getElementsByTag("salePrice").text().replaceAll(",", ""));
+                    title       = unparsedProduct.getElementsByTag("name").text();
+                    description = unparsedProduct.getElementsByTag("shortDescription").text();
+                    productURL  = unparsedProduct.getElementsByTag("productUrl").text();
+                    imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
+                    reviews     = new ArrayList<>();
+                    hasInfo     = true;
 
-                setReviewStats();
+                    setReviewStats();
+                }
+                else
+                {
+                    hasInfo = false;
+                }
+
+
             }
             else
             {
@@ -63,6 +72,12 @@ public class WalmartProductInfo extends ProductInfo
 
             try {
                 Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+
+                if (reviewResultPage.getElementsByTag("title").text().equals("Error"))
+                {
+                    return;
+                }
+
                 Elements unparsedRatings = reviewResultPage.getElementsByTag("ratingCounts");
 
                 for (int i = 0; i < unparsedRatings.size(); i++) {
@@ -89,6 +104,12 @@ public class WalmartProductInfo extends ProductInfo
             try
             {
                 Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+
+                if (reviewResultPage.getElementsByTag("title").text().equals("Error"))
+                {
+                    return;
+                }
+
                 Elements unparsedReviews = reviewResultPage.getElementsByTag("review");
 
                 for (Element unparsedReview : unparsedReviews)

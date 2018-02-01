@@ -78,10 +78,17 @@ class AmazonProductSearch
     {
         if (hasProducts)
         {
+            final int PRODUCTS_PER_PAGE = 10;
+
+
+            if (numProductsToParse > totalPages * PRODUCTS_PER_PAGE)
+            {
+                numProductsToParse = totalPages * PRODUCTS_PER_PAGE;
+            }
+
             ArrayList<Product> productSet = new ArrayList<>();
             int productsParsed = 0;
 
-            final int PRODUCTS_PER_PAGE = 10;
 
             for (Integer productPageNum = totalProductsParsed / PRODUCTS_PER_PAGE + 1; productPageNum <= totalPages && productsParsed < numProductsToParse; productPageNum++) {
                 try {
@@ -92,10 +99,10 @@ class AmazonProductSearch
 
                     if (unparsedProducts != null) {
                         for (int productIndex = totalProductsParsed % (PRODUCTS_PER_PAGE * productPageNum); productIndex < unparsedProducts.size() && productsParsed < numProductsToParse; productIndex++) {
-                            String unparsedPrice = unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
+
                             String upc = unparsedProducts.get(productIndex).getElementsByTag("UPC").text();
 
-                            if (unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").hasText() && !unparsedPrice.contains("display") && !upc.equals("")) {
+                            if (unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").hasText() && !unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice").select("FormattedPrice").text().contains("display") && !upc.equals("")) {
                                 Element unparsedProduct = unparsedProducts.get(productIndex);
                                 Product product = new Product(new AmazonProductInfo(unparsedProduct), upc);
                                 productSet.add(product);
@@ -108,6 +115,8 @@ class AmazonProductSearch
                     e.printStackTrace();
                 }
             }
+
+            totalProductsParsed += productsParsed;
 
             return productSet;
         }

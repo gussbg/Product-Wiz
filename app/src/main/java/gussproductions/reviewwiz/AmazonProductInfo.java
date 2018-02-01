@@ -59,14 +59,23 @@ public class AmazonProductInfo extends ProductInfo
 
     private void setProductInfo(Element unparsedProduct)
     {
-        String unparsedPrice = unparsedProduct.getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
+        String unparsedPrice   = unparsedProduct.getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
 
         itemID      = unparsedProduct.getElementsByTag("ASIN").text();
         price       = new BigDecimal(unparsedPrice);
         title       = unparsedProduct.getElementsByTag("Title").text();
         description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text();
         productURL  = unparsedProduct.getElementsByTag("DetailPageURL").text();
-        imageURL    = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
+
+        if (unparsedProduct.getElementsByTag("LargeImage").first() != null)
+        {
+            imageURL = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
+        }
+        else
+        {
+            imageURL = null;
+        }
+
         reviews     = new ArrayList<>();
         hasInfo     = true;
     }

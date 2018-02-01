@@ -21,6 +21,7 @@ import java.util.Locale;
 public class EbayProductInfo extends ProductInfo
 {
     private String baseReviewURL;
+    private boolean hasReviews;
 
     EbayProductInfo(String upc)
     {
@@ -73,6 +74,11 @@ public class EbayProductInfo extends ProductInfo
                 if (unparsedItemDescription != null)
                 {
                     description = unparsedItemDescription.text().replaceAll("\\<.*?\\>", "");
+                    hasReviews  = true;
+                }
+                else
+                {
+                    hasReviews = false;
                 }
 
 
@@ -90,20 +96,24 @@ public class EbayProductInfo extends ProductInfo
 
     void setReviewStats()
     {
-        if (hasInfo)
+        if (hasInfo && hasReviews)
         {
             try {
                 Document reviewResultPage = Jsoup.connect(productURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-                Elements unparsedRatingCounts = reviewResultPage.getElementsByClass("ebay-review-list").first().getElementsByClass("ebay-review-item-r");
+                System.out.println(productURL);
+                //Elements unparsedRatingCounts = reviewResultPage.getElementsByClass("ebay-review-list").first().getElementsByClass("ebay-review-item-r");
 
-                Integer numStars[] = new Integer[5];
+                if (reviewResultPage.getElementsByClass("ebay-review-list").first() != null)
+                {
+                    Elements unparsedRatingCounts = reviewResultPage.getElementsByClass("ebay-review-list").first().getElementsByClass("ebay-review-item-r");
+                    Integer numStars[] = new Integer[5];
 
-                for (int i = unparsedRatingCounts.size() - 1; i >= 0; i--) {
-                    numStars[i] = Integer.parseInt(unparsedRatingCounts.get(i).text());
+                    for (int i = unparsedRatingCounts.size() - 1; i >= 0; i--) {
+                        numStars[i] = Integer.parseInt(unparsedRatingCounts.get(i).text());
+                    }
+
+                    reviewStats = new ReviewStats(numStars);
                 }
-
-                reviewStats = new ReviewStats(numStars);
-
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -112,7 +122,7 @@ public class EbayProductInfo extends ProductInfo
 
     void parseReviewPage()
     {
-        if (hasInfo)
+        if (hasInfo && hasReviews)
         {
             setReviewPage();
 
@@ -173,7 +183,7 @@ public class EbayProductInfo extends ProductInfo
 
     private void setReviewPage()
     {
-        if(hasInfo)
+        if (hasInfo && hasReviews)
         {
             curReviewPageNum++;
 
