@@ -2,55 +2,38 @@ package gussproductions.reviewwiz;
 import java.util.Date;
 
 /**
- * Created by Brendon on 1/11/2018.
+ * This Review class encapsulates what datums are a part of a Review.
+ * Some ProductInfo objects will leave some parameters as null or a default
+ * value if they aren't present in the unparsed review, which is uncommon.
+ *
+ * @author Brendon Guss
+ * @since  01/11/2018
  */
-
-public class Review
+class Review
 {
-    private String reviewTitle;
-    private String reviewText;
+    private String     reviewTitle;
+    private String     reviewText;
     private StarRating starRating;
-    private Date date;
-    private Integer numHelpful;
-    private Integer numUnhelpful;
+    private Date       date;
+    private Integer    numHelpful;
+    private Integer    numUnhelpful;
 
-    Review(String reviewTitle, String reviewText, StarRating starRating, Date date, Integer numHelpful, Integer numUnhelpful)
+    Review(String reviewTitle, String reviewText, StarRating starRating, Date date, Integer numHelpful
+                             , Integer numUnhelpful)
     {
-        this.reviewTitle = reviewTitle;
-        this.reviewText = reviewText;
-        this.starRating = starRating;
-        this.date = date;
-        this.numHelpful = numHelpful;
+        this.reviewTitle  = reviewTitle;
+        this.reviewText   = reviewText;
+        this.starRating   = starRating;
+        this.date         = date;
+        this.numHelpful   = numHelpful;
         this.numUnhelpful = numUnhelpful;
     }
 
-    public String getReviewTitle()
-    {
-        return reviewTitle;
-    }
-
-    public String getReviewText()
-    {
-        return reviewText;
-    }
-
-    public StarRating getStarRating()
-    {
-        return starRating;
-    }
-
-    public Date getDate()
-    {
-        return date;
-    }
-
-    public Integer getNumHelpful()
-    {
-        return numHelpful;
-    }
-
-    public Integer getNumUnhelpful()
-    {
-        return numUnhelpful;
-    }
+    // Getter methods.
+    String     getReviewTitle()  { return reviewTitle;  }
+    String     getReviewText()   { return reviewText;   }
+    StarRating getStarRating()   { return starRating;   }
+    Date       getDate()         { return date;         }
+    Integer    getNumHelpful()   { return numHelpful;   }
+    Integer    getNumUnhelpful() { return numUnhelpful; }
 }

@@ -1,17 +1,25 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.reviewwiz;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Brendon on 1/11/2018.
- */
 
-public enum StarRating
+/**
+ * The StarRating enum is used to represent the star ratings that
+ * are used to evaluate the quality of reviews by customers.
+ *
+ * @author Brendon Guss
+ * @since  01/11/2018
+ */
+enum StarRating
 {
     ONE_STAR(1), TWO_STAR(2), THREE_STAR(3), FOUR_STAR(4), FIVE_STAR(5);
 
-    private Integer value;
+    private Integer                         value;
     private static Map<Integer, StarRating> valueMap = new HashMap<>();
 
     StarRating(Integer value)
@@ -27,6 +35,12 @@ public enum StarRating
         }
     }
 
+    /**
+     * Given an Integer, the StarRating representation is returned.
+     *
+     * @param starRating The Integer to be converted to StarRating.
+     * @return The StarRating value.
+     */
     static StarRating valueOf(Integer starRating)
     {
         return valueMap.get(starRating);

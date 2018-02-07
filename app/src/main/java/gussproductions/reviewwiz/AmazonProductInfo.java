@@ -1,9 +1,9 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.reviewwiz;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -16,12 +16,29 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by Brendon on 1/8/2018.
+/*
+ * Jsoup is used for parsing Product and review information from the Amazon Product Advertising API
+ * responses.
  */
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-public class AmazonProductInfo extends ProductInfo
+
+/**
+ * The AmazonProductInfo class encapsulates Amazon product information, reviews, and review
+ * statistics. The product information is set within the constructor. Reviews and review statistics
+ * are set in separate methods because of the extra time they each consume.
+ *
+ * @author Brendon Guss
+ * @since  01/03/2018
+ */
+class AmazonProductInfo extends ProductInfo
 {
+    /**
+     * Sets the Amazon product information given a UPC (if the product is listed on Amazon).
+     */
     AmazonProductInfo(String upc)
     {
         curReviewPageNum = 1;
@@ -29,11 +46,14 @@ public class AmazonProductInfo extends ProductInfo
         try
         {
             AmazonRequestHelper amazonRequestHelper = new AmazonRequestHelper(upc, AmazonRequestMode.ITEM_LOOKUP_INFO);
+            String              requestURL          = amazonRequestHelper.getRequestURL();
+            Document            productResultPage   = Jsoup.connect(requestURL).userAgent("Mozilla/5.0")
+                                                           .ignoreHttpErrors(true).ignoreContentType(true).get();
 
-            String requestURL = amazonRequestHelper.getRequestURL();
-            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            Element  unparsedProduct = productResultPage.getElementsByTag("Item").first();
+            // Only the first Item element is set in case multiple results are returned, although this is not expected.
+            Element             unparsedProduct     = productResultPage.getElementsByTag("Item").first();
 
+            // If an item is found on Amazon, then the info is parsed and set.
             if (unparsedProduct != null)
             {
                 setProductInfo(unparsedProduct);
@@ -50,6 +70,10 @@ public class AmazonProductInfo extends ProductInfo
 
     }
 
+    /**
+     * Sets the Amazon product information given an unparsed product element. This constructor is used by the
+     * AmazonProductSearch as it generates a list of multiple items.
+     */
     AmazonProductInfo(Element unparsedProduct)
     {
         curReviewPageNum = 1;
@@ -57,9 +81,15 @@ public class AmazonProductInfo extends ProductInfo
         setProductInfo(unparsedProduct);
     }
 
+    /**
+     * Sets the Amazon product information given an unparsed Jsoup Element.
+     *
+     * @param unparsedProduct The unparsed Amazon product information.
+     */
     private void setProductInfo(Element unparsedProduct)
     {
-        String unparsedPrice   = unparsedProduct.getElementsByTag("LowestNewPrice").select("FormattedPrice").text().substring(1).replaceAll(",", "");
+        String unparsedPrice = unparsedProduct.getElementsByTag("LowestNewPrice").select("FormattedPrice")
+                                              .text().substring(1).replaceAll(",", "");
 
         itemID      = unparsedProduct.getElementsByTag("ASIN").text();
         price       = new BigDecimal(unparsedPrice);
@@ -67,6 +97,7 @@ public class AmazonProductInfo extends ProductInfo
         description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text();
         productURL  = unparsedProduct.getElementsByTag("DetailPageURL").text();
 
+        // Not all Amazon products have images, so the lack of an image is handled here.
         if (unparsedProduct.getElementsByTag("LargeImage").first() != null)
         {
             imageURL = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
@@ -76,55 +107,67 @@ public class AmazonProductInfo extends ProductInfo
             imageURL = null;
         }
 
-        reviews     = new ArrayList<>();
-        hasInfo     = true;
+        reviews = new ArrayList<>();
+        hasInfo = true;
     }
 
+    /**
+     * Amazon review statistics are set using this method. It is in a separate method because of the extra time it
+     * takes to parse this information.
+     */
     void setReviewStats()
     {
-        String reviewIframe;
-        String reviewURL = null;
-        Document reviewIFrame;
-        Element unparsedReviewStats = null;
-        int totalNumReviews = 0;
+        String    reviewIframe;
+        String    reviewURL;
+        Document  reviewIFrame;
+        Element   unparsedReviewStats;
+        int       totalNumReviews;
         Integer[] numStars;
 
-        reviewIframe = getReviewIFrame(itemID);
-        numStars = new Integer[5];
+        reviewIframe    = getReviewIFrame(itemID);
+        totalNumReviews = 0;
+        numStars        = new Integer[5];
 
         try
         {
-            reviewIFrame = Jsoup.connect(reviewIframe).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
+            reviewIFrame        = Jsoup.connect(reviewIframe).userAgent("Mozilla/5.0").ignoreHttpErrors(true)
+                                       .ignoreContentType(true).get();
             unparsedReviewStats = reviewIFrame.getElementsByClass("crIFrameHeaderHistogram").first();
 
+            // No review statistics are set if none can be found.
             if (unparsedReviewStats == null)
             {
-                reviewStats = null;
+                reviewStats  = null;
                 curReviewURL = null;
             }
             else
             {
-                reviewURL = reviewIFrame.getElementsByClass("asinReviewsSummary").select("a").attr("abs:href");
+                reviewURL = reviewIFrame.getElementsByClass("asinReviewsSummary")
+                                        .select("a").attr("abs:href");
 
-                Pattern numReviewsPattern = Pattern.compile("(.*?) Review(|s)");
-                Pattern numReviewsStarsPattern = Pattern.compile(" star (.*?)%");
+                // Regex Pattern for the total number of Reviews.
+                Pattern numReviewsPattern       = Pattern.compile("(.*?) Review(|s)");
 
-                Matcher numReviewsMatcher = numReviewsPattern.matcher(unparsedReviewStats.text());
-                Matcher numReviewsStarsMatcher = numReviewsStarsPattern.matcher(unparsedReviewStats.text());
+                // Regex Pattern for the percentage of a particular star rating (1 - 5).
+                Pattern ratingPercentagePattern = Pattern.compile(" star (.*?)%");
+
+                Matcher numReviewsMatcher      = numReviewsPattern.matcher(unparsedReviewStats.text());
+                Matcher ratingPercentageMatcher = ratingPercentagePattern.matcher(unparsedReviewStats.text());
 
                 if (numReviewsMatcher.find())
                 {
                     totalNumReviews = Integer.parseInt(numReviewsMatcher.group(1).replace(",", ""));
                 }
 
-                for (int i = 0; i < numStars.length && numReviewsStarsMatcher.find(); i++)
+                for (int i = 0; i < numStars.length && ratingPercentageMatcher.find(); i++)
                 {
-                    numStars[i] = (int) Math.round((Double.parseDouble(numReviewsStarsMatcher.group(1)) / 100.0) * totalNumReviews);
+                    // Calculate the number of stars given the
+                    numStars[i] = (int) Math.round((Double.parseDouble(ratingPercentageMatcher.group(1)) / 100.0)
+                                                    * totalNumReviews);
                 }
 
                 curReviewURL = reviewURL;
-
-                reviewStats = new ReviewStats(numStars);
+                reviewStats  = new ReviewStats(numStars);
             }
         }
 
@@ -132,70 +175,74 @@ public class AmazonProductInfo extends ProductInfo
         {
             ioe.printStackTrace();
         }
-
-
-
-
     }
 
     /**
-     * A helper method for getReviewStats that returns a product's review URL.
+     * A helper method for getReviewStats that returns a product's review IFrame URL.
      *
      * @param asin The ASIN of the product.
      * @return The review URL.
      */
     private String getReviewIFrame(String asin)
     {
-        String reviewURL = null;
-        String responseURL;
-
+        String   reviewIFrame = null;
+        String   responseURL;
         Document reviewResultsPage;
+        AmazonRequestHelper requestHelper;
 
         try
         {
-            AmazonRequestHelper requestHelper = new AmazonRequestHelper(asin, AmazonRequestMode.ITEM_LOOKUP_REVIEWS);
-            responseURL = requestHelper.getRequestURL();
-            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true).ignoreContentType(true).get();
-            reviewURL = reviewResultsPage.getElementsByTag("IFrameURL").text();
+            requestHelper     = new AmazonRequestHelper(asin, AmazonRequestMode.ITEM_LOOKUP_REVIEWS);
+            responseURL       = requestHelper.getRequestURL();
+            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true)
+                                     .ignoreContentType(true).get();
+            reviewIFrame      = reviewResultsPage.getElementsByTag("IFrameURL").text();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return reviewURL;
+        return reviewIFrame;
     }
 
-    public void parseReviewPage()
+    /**
+     * Parses all of the reviews on the next review page of an Amazon product.
+     */
+    void parseNextReviewPage()
     {
-        if (curReviewURL == null)
-        {
-            reviews = null;
-        }
-        else
+        // If there are no reviews to parse, this method does nothing and no reviews are set.
+        if (curReviewURL != null)
         {
             try
             {
-                Document reviewPage = Jsoup.connect(curReviewURL).ignoreHttpErrors(true).ignoreContentType(true).get();
-
-                Elements unparsedPageNums = reviewPage.getElementsByClass("page-button");
-                Elements unparsedReviews = reviewPage.getElementsByClass("a-section celwidget");
-
-                DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+                Document   reviewPage       = Jsoup.connect(curReviewURL).ignoreHttpErrors(true)
+                                                .ignoreContentType(true).get();
+                Elements   unparsedPageNums = reviewPage.getElementsByClass("page-button");
+                Elements   unparsedReviews  = reviewPage.getElementsByClass("a-section celwidget");
+                DateFormat dateFormat       = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
                 for (Element unparsedReview : unparsedReviews)
                 {
-                    Integer numHelpful = 0;
-                    Date reviewDate = new Date();
-                    String reviewTitle = unparsedReview.getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold").first().text();
-                    StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview.getElementsByClass("a-row").first().getElementsByClass("a-link-normal").first().attr("title").substring(0, 1)));
-                    String reviewText = unparsedReview.getElementsByClass("a-size-base review-text").first().text().replaceAll("\\<.*?\\>", "");
-
                     Element unparsedNumHelpful = unparsedReview.getElementsByClass("review-votes").first();
+
+                    Integer    numHelpful  = DEFAULT_HELPFUL_NUM;
+                    Date       reviewDate  = new Date();
+                    String     reviewTitle = unparsedReview
+                            .getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold")
+                            .first().text();
+                    StarRating starRating  = StarRating.valueOf(Integer.parseInt(unparsedReview
+                            .getElementsByClass("a-row").first()
+                            .getElementsByClass("a-link-normal").first()
+                            .attr("title").substring(0, 1)));
+                    String     reviewText  = unparsedReview.getElementsByClass("a-size-base review-text")
+                                                           .first().text().replaceAll("\\<.*?\\>", "");
 
                     try
                     {
-                        reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("a-size-base a-color-secondary review-date").first().text().substring(3));
+                        reviewDate = dateFormat.parse(unparsedReview
+                                     .getElementsByClass("a-size-base a-color-secondary review-date")
+                                     .first().text().substring(3));
                     }
                     catch (ParseException pe)
                     {
@@ -204,15 +251,17 @@ public class AmazonProductInfo extends ProductInfo
 
                     if (unparsedNumHelpful == null)
                     {
-                        numHelpful = DEFAULT_HELPFUL_NUM;
+                        numHelpful = DEFAULT_HELPFUL_NUM; // Handles the case of no helpful reviews.
                     }
                     else if (unparsedNumHelpful.text().substring(0, 3).equals("One"))
                     {
-                        numHelpful = 1;
+                        numHelpful = 1; // Handles the case of only one helpful review.
                     }
                     else
                     {
+                        // Regex pattern for the number of helpful reviews.
                         Pattern numHelpfulPattern = Pattern.compile("(.*?) people found this helpful");
+
                         Matcher numHelpfulMatcher = numHelpfulPattern.matcher(unparsedNumHelpful.text());
 
                         if (numHelpfulMatcher.find())
@@ -221,11 +270,15 @@ public class AmazonProductInfo extends ProductInfo
                         }
                     }
 
-                    reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, DEFAULT_UNHELPFUL_NUM));
+                    // Each parsed review datum is added to a new review and added to the product's reviews, the
+                    // number of unhelpful reviews is always zero since Amazon reviews do not have this metric.
+                    reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful,
+                                           DEFAULT_UNHELPFUL_NUM));
                 }
 
                 String prevReviewPage = curReviewURL;
 
+                // Set the current review URL to the next review URL for use in the next method call.
                 for (Element unparsedPageNum : unparsedPageNums)
                 {
                     if (Integer.parseInt(unparsedPageNum.text().replace(",", "")) == curReviewPageNum + 1)
@@ -234,6 +287,7 @@ public class AmazonProductInfo extends ProductInfo
                     }
                 }
 
+                // The current review URL is set to null if there is no more pages of reviews to parse.
                 if (curReviewURL.equals(prevReviewPage))
                 {
                     curReviewURL = null;

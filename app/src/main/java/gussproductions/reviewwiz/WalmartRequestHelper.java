@@ -1,21 +1,24 @@
-package gussproductions.reviewwiz;
-
-import java.util.HashMap;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-/**
- * Created by Brendon on 1/8/2018.
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
  */
 
-public class WalmartRequestHelper
+package gussproductions.reviewwiz;
+
+
+/**
+ * This request helper is used to generate the request URL that links to
+ * XML data that can later be parsed into Walmart product or review information.
+ *
+ * @author Brendon Guss
+ * @since  01/08/2018
+ */
+class WalmartRequestHelper extends RequestHelper
 {
-    private String requestURL;
-    private HashMap<String, String> requestParams = new HashMap<>();
-
-
     private final String ENDPOINT = "http://api.walmartlabs.com/v1/";
 
+    /**
+     * Generates a request URL that links to product information.
+     */
     WalmartRequestHelper (String upc)
     {
         requestURL = ENDPOINT + "items?";
@@ -24,9 +27,12 @@ public class WalmartRequestHelper
 
         requestParams.put("upc", upc);
 
-        addQuery();
+        requestURL += genQueryString();
     }
 
+    /**
+     * Generates a request URL that links to reviews given an ItemID.
+     */
     WalmartRequestHelper(String itemID, Integer reviewPageNum)
     {
         requestURL = ENDPOINT + "reviews/";
@@ -39,9 +45,12 @@ public class WalmartRequestHelper
 
         requestParams.put("page", reviewPageNum.toString());
 
-        addQuery();
+        requestURL += genQueryString();
     }
 
+    /**
+     * Sets the parameters common to both product and review requests.
+     */
     private void setCommonParams()
     {
         final String RESPONSE_FORMAT = "xml";
@@ -51,14 +60,11 @@ public class WalmartRequestHelper
         requestParams.put("format", RESPONSE_FORMAT);
     }
 
-    private void addQuery()
-    {
-        SortedMap<String, String> sortedParamMap = new TreeMap<>(requestParams);
-        String canonicalQS = RequestHelperTools.canonicalize(sortedParamMap);
-
-        requestURL += canonicalQS;
-    }
-
+    /**
+     * Sets the itemID, a unique identifier for Walmart products.
+     *
+     * @param itemID The itemID to set.
+     */
     private void setItemID(String itemID)
     {
         requestURL += itemID;

@@ -60,28 +60,28 @@ public class ExampleUnitTest
     @Test
     public void test_product_search()
     {
-        ProductSearch productSearch = new ProductSearch("phone");
+        AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dvd");
 
-        ArrayList<Product> productSet = productSearch.getProductSet();
+        ArrayList<Product> productSet = amazonProductSearch.parseProducts(100);
 
         for (Product product : productSet)
         {
             product.getWalmartProductInfo().getReviewStats();
-            product.getWalmartProductInfo().parseReviewPage();
-            product.getWalmartProductInfo().parseReviewPage();
+            product.getWalmartProductInfo().parseNextReviewPage();
+            product.getWalmartProductInfo().parseNextReviewPage();
 
-            product.getEbayProductInfo().getDescription();
+            product.getEbayProductInfo().setDescription();
             product.getEbayProductInfo().setReviewStats();
-            product.getEbayProductInfo().parseReviewPage();
-            product.getEbayProductInfo().parseReviewPage();
+            product.getEbayProductInfo().parseNextReviewPage();
+            product.getEbayProductInfo().parseNextReviewPage();
 
             product.getAmazonProductInfo().setReviewStats();
-            product.getAmazonProductInfo().parseReviewPage();
-            product.getAmazonProductInfo().parseReviewPage();
+            product.getAmazonProductInfo().parseNextReviewPage();
+            product.getAmazonProductInfo().parseNextReviewPage();
 
             product.getBestbuyProductInfo().getReviewStats();
-            product.getBestbuyProductInfo().parseReviewPage();
-            product.getBestbuyProductInfo().parseReviewPage();
+            product.getBestbuyProductInfo().parseNextReviewPage();
+            product.getBestbuyProductInfo().parseNextReviewPage();
         }
     }
 

@@ -1,18 +1,19 @@
-package gussproductions.reviewwiz;
-
-import java.util.HashMap;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-/**
- * Created by Brendon on 1/17/2018.
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
  */
 
-public class BestbuyRequestHelper
-{
-    private String requestURL;
-    private HashMap<String, String> requestParams = new HashMap<>();
+package gussproductions.reviewwiz;
 
+
+/**
+ * This request helper is used to generate the request URL that links to
+ * XML data that can later be parsed into BestBuy product information.
+ *
+ * @author Brendon Guss
+ * @since  01/09/2018
+ */
+class BestbuyRequestHelper extends RequestHelper
+{
     BestbuyRequestHelper(String upc)
     {
         final String RESPONSE_FORMAT = "xml";
@@ -27,14 +28,24 @@ public class BestbuyRequestHelper
         requestParams.put("format", RESPONSE_FORMAT);
 
         setResponseAttributes();
-        addQuery();
+
+        requestURL += genQueryString();
     }
 
+    /**
+     * Sets the UPC for the product information request.
+     *
+     * @param upc The unique product identifier.
+     */
     private void setUPC(String upc)
     {
         requestURL += "(upc=" + upc + ")?";
     }
 
+    /**
+     * Sets the attributes for the product data to be sent in the response
+     * such as the price and description.
+     */
     private void setResponseAttributes()
     {
         String responseAttributes = "image,"
@@ -47,18 +58,14 @@ public class BestbuyRequestHelper
                                   + "url";
 
         requestParams.put("show", responseAttributes);
-
     }
 
-    private void addQuery()
-    {
-        SortedMap<String, String> sortedParamMap = new TreeMap<>(requestParams);
-        String canonicalQS = RequestHelperTools.canonicalize(sortedParamMap);
-
-        requestURL += canonicalQS;
-    }
-
-    public String getRequestURL()
+    /**
+     * Gets the request URL that links to XML product data.
+     *
+     * @return The request URL.
+     */
+    String getRequestURL()
     {
         return requestURL;
     }
