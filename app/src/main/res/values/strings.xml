@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Review Wiz</string>
+    <string name="app_name">Product Wiz</string>
+    <string name="search_hint">Search for a product...</string>
 </resources>

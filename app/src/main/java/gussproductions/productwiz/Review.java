@@ -1,4 +1,4 @@
-package gussproductions.reviewwiz;
+package gussproductions.productwiz;
 import java.util.Date;
 
 /**

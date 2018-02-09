@@ -2,7 +2,7 @@
  * Copyright (c) 2018, Brendon Guss. All rights reserved.
  */
 
-package gussproductions.reviewwiz;
+package gussproductions.productwiz;
 
 
 /**

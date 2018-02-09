@@ -1,4 +1,4 @@
-package gussproductions.reviewwiz;
+package gussproductions.productwiz;
 
 /**
  * This ReviewStatics class encapsulates all the attributes regarding reviews such as

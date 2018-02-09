@@ -2,7 +2,7 @@
  * Copyright (c) 2018, Brendon Guss. All rights reserved.
  */
 
-package gussproductions.reviewwiz;
+package gussproductions.productwiz;
 
 /**
  * The Product class is an aggregation of all generated Product information
