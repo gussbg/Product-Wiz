@@ -29,13 +29,15 @@ class AmazonProductSearch
     private AmazonRequestHelper amazonRequestHelper;
     private Integer             totalPageNum;
     private String              responseURL;
-    private int                 totalProductsParsed;
+    private int                 totalProductsScanned;
     private boolean             hasProducts;
+
+    final static int            PRODUCTS_PER_PAGE = 10;
 
     AmazonProductSearch(String searchText)
     {
-        totalProductsParsed = 0;
-        responseURL         = null;
+        totalProductsScanned = 0;
+        responseURL          = null;
 
         try
         {
@@ -62,29 +64,22 @@ class AmazonProductSearch
     }
 
     /**
-     * The parseProducts method adds products to the Product set based on how many products have
+     * The getMoreProducts method adds products to the Product set based on how many products have
      * already been added. It also keeps track of which product page it needs to be accessing.
      *
      * @param numProductsToParse The number of products to parse and add to the productSet.
      */
-    ArrayList<Product> parseProducts(int numProductsToParse)
+    ArrayList<Product> getMoreProducts(int numProductsToParse)
     {
         if (hasProducts)
         {
-            final int PRODUCTS_PER_PAGE = 10;
-
-            if (numProductsToParse > totalPageNum * PRODUCTS_PER_PAGE)
-            {
-                numProductsToParse = totalPageNum * PRODUCTS_PER_PAGE;
-            }
-
             ArrayList<Product> productSet     = new ArrayList<>();
-            int                productsParsed = 0;
+            int productsParsed = 0;
 
-
-            for (Integer productPageNum = totalProductsParsed / PRODUCTS_PER_PAGE + 1;
+            for (Integer productPageNum = totalProductsScanned / PRODUCTS_PER_PAGE + 1;
                  productPageNum <= totalPageNum && productsParsed < numProductsToParse; productPageNum++)
             {
+
                 try
                 {
                     amazonRequestHelper.setProductPageNum(productPageNum);
@@ -92,23 +87,22 @@ class AmazonProductSearch
                     responseURL = amazonRequestHelper.getRequestURL();
 
                     Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0")
-                                                      .ignoreHttpErrors(true).ignoreContentType(true).get();
+                            .ignoreHttpErrors(true).ignoreContentType(true).get();
                     Elements unparsedProducts  = productResultPage.select("Item");
 
                     if (unparsedProducts != null)
                     {
-                        for (int productIndex = totalProductsParsed % (PRODUCTS_PER_PAGE * productPageNum);
+                        for (int productIndex = totalProductsScanned % PRODUCTS_PER_PAGE;
                              productIndex < unparsedProducts.size() && productsParsed < numProductsToParse;
-                             productIndex++)
+                             productIndex++, totalProductsScanned++)
                         {
-
                             String upc = unparsedProducts.get(productIndex).getElementsByTag("UPC").text();
 
                             // Ensures that only products that are new and have a price and UPC are parsed.
                             if (unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice")
-                                                                  .select("FormattedPrice").hasText()
+                                    .select("FormattedPrice").hasText()
                                     && !unparsedProducts.get(productIndex).getElementsByTag("LowestNewPrice")
-                                                        .select("FormattedPrice").text().contains("display")
+                                    .select("FormattedPrice").text().contains("display")
                                     && !upc.equals(""))
                             {
                                 Element unparsedProduct = unparsedProducts.get(productIndex);
@@ -125,8 +119,6 @@ class AmazonProductSearch
                     e.printStackTrace();
                 }
             }
-
-            totalProductsParsed += productsParsed;
 
             return productSet;
         }
@@ -165,5 +157,10 @@ class AmazonProductSearch
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean hasProducts()
+    {
+        return hasProducts;
     }
 }

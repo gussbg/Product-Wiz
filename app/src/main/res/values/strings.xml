@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Product Wiz</string>
     <string name="search_hint">Search for a product...</string>
+    <string name="no_products">No Products Found</string>
+    <string name="load_more_products">Load More</string>
 </resources>

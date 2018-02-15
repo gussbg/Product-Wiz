@@ -31,10 +31,7 @@ class Product
     // Getter methods.
     String             getUPC()                { return upc;                }
     AmazonProductInfo  getAmazonProductInfo()  { return amazonProductInfo;  }
-    WalmartProductInfo getWalmartProductInfo()
-    {
-        return walmartProductInfo;
-    }
+    WalmartProductInfo getWalmartProductInfo() { return walmartProductInfo; }
     BestbuyProductInfo getBestbuyProductInfo() { return bestbuyProductInfo; }
     EbayProductInfo    getEbayProductInfo()    { return ebayProductInfo;    }
 }

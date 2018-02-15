@@ -14,8 +14,19 @@ public class ExampleUnitTest
     @Test
     public void test_amazon_search()
     {
-        AmazonProductSearch amazonProductSearch = new AmazonProductSearch("iphone");
+        AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dvd");
 
+        //amazonProductSearch.getMoreProducts(10);
+        amazonProductSearch.getMoreProducts(10);
+
+        ArrayList<Product> products = amazonProductSearch.getMoreProducts(10);
+
+        for (Product product : products)
+        {
+            System.out.println(product.getAmazonProductInfo().getTitle());
+        }
+
+        System.out.println(products.size());
     }
 
     @Test
@@ -62,7 +73,7 @@ public class ExampleUnitTest
     {
         AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dvd");
 
-        ArrayList<Product> productSet = amazonProductSearch.parseProducts(100);
+        ArrayList<Product> productSet = amazonProductSearch.getMoreProducts(100);
 
         for (Product product : productSet)
         {
