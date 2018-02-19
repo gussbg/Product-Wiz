@@ -236,7 +236,7 @@ class AmazonProductInfo extends ProductInfo
                             .getElementsByClass("a-link-normal").first()
                             .attr("title").substring(0, 1)));
                     String     reviewText  = unparsedReview.getElementsByClass("a-size-base review-text")
-                                                           .first().text().replaceAll("\\<.*?\\>", "");
+                                                           .first().text().replaceAll("<.*?>", "");
 
                     try
                     {

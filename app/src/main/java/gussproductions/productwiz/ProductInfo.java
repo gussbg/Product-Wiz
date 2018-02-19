@@ -4,6 +4,8 @@
 
 package gussproductions.productwiz;
 
+import android.graphics.Bitmap;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -24,6 +26,7 @@ abstract class ProductInfo
     String            description;
     String            productURL;
     String            imageURL;
+    Bitmap            image;
     ReviewStats       reviewStats;
     ArrayList<Review> reviews;
     String            curReviewURL;

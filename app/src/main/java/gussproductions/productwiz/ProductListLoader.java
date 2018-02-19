@@ -2,14 +2,17 @@ package gussproductions.productwiz;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
  * Created by Brendon on 2/11/2018.
  */
 
-public class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
+class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
 {
     private ArrayList <Product> productList;
     private AmazonProductSearch amazonProductSearch;
@@ -26,7 +29,26 @@ public class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
     {
         productList = amazonProductSearch.getMoreProducts(AmazonProductSearch.PRODUCTS_PER_PAGE);
 
+        for (Product product : productList)
+        {
+            product.getAmazonProductInfo().image = loadImage(product.getAmazonProductInfo().imageURL);
+        }
+
         return productList;
+    }
+
+    private Bitmap loadImage(String imageURL)
+    {
+        Bitmap mIcon11 = null;
+
+        try {
+            InputStream in = new java.net.URL(imageURL).openStream();
+            mIcon11 = BitmapFactory.decodeStream(in);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return mIcon11;
     }
 
     /**

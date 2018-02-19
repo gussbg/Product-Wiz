@@ -8,7 +8,7 @@ import android.content.Context;
  * Created by Brendon on 2/14/2018.
  */
 
-public class AmazonSearchLoader extends AsyncTaskLoader<AmazonProductSearch>
+class AmazonSearchLoader extends AsyncTaskLoader<AmazonProductSearch>
 {
     private AmazonProductSearch amazonProductSearch;
     private String              searchKeywords;

@@ -1,6 +1,9 @@
 package gussproductions.productwiz;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,13 +11,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
  * Created by Brendon on 2/13/2018.
  */
 
-public class ProductListAdapter extends ArrayAdapter<Product>
+class ProductListAdapter extends ArrayAdapter<Product>
 {
     private Context context;
 
@@ -56,6 +60,12 @@ public class ProductListAdapter extends ArrayAdapter<Product>
         TextView textView = view.findViewById(R.id.textView);
         textView.setText(product.getAmazonProductInfo().getTitle());
 
-        return textView;
+        ImageView imageView = view.findViewById(R.id.imageView);
+
+        imageView.setImageBitmap(product.getAmazonProductInfo().image);
+
+        return view;
     }
 }
+
+

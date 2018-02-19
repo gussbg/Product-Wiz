@@ -5,11 +5,13 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity
         noProductsMessage  = findViewById(R.id.noProducts);
 
         btnLoadMore.setText(getResources().getString(R.string.load_more_products));
+        btnLoadMore.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        btnLoadMore.setTextColor(Color.WHITE);
     }
 
     @Override
@@ -100,6 +104,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         // Inflate the options menu from XML
@@ -132,6 +137,20 @@ public class MainActivity extends AppCompatActivity
         });
 
         return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if (item.getItemId() == R.id.barcodeScan)
+        {
+            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+
+            this.startActivity(intent);
+        }
+
+        return true;
     }
 
     LoaderManager.LoaderCallbacks<ArrayList<Product>> productLoaderListener = new LoaderManager.LoaderCallbacks<ArrayList<Product>>()
@@ -158,6 +177,11 @@ public class MainActivity extends AppCompatActivity
             if (products.size() == 0)
             {
                 noProductsMessage.setVisibility(View.VISIBLE);
+            }
+            else if (products.size() < 10)
+            {
+                listView.setVisibility(View.VISIBLE);
+                listView.removeFooterView(btnLoadMore);
             }
             else
             {
