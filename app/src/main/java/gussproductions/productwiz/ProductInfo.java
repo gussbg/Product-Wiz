@@ -6,6 +6,7 @@ package gussproductions.productwiz;
 
 import android.graphics.Bitmap;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ import java.util.ArrayList;
  * @author Brendon Guss
  * @since  01/27/2018
  */
-abstract class ProductInfo
+abstract class ProductInfo implements Serializable
 {
     String            itemID;
     BigDecimal        price;
@@ -26,9 +27,7 @@ abstract class ProductInfo
     String            description;
     String            productURL;
     String            imageURL;
-    Bitmap            image;
     ReviewStats       reviewStats;
-    ArrayList<Review> reviews;
     String            curReviewURL;
     int               curReviewPageNum;
     boolean           hasInfo;
@@ -36,15 +35,12 @@ abstract class ProductInfo
     final int DEFAULT_HELPFUL_NUM   = 0;
     final int DEFAULT_UNHELPFUL_NUM = 0;
 
-    abstract void parseNextReviewPage();
-
     // Getter Methods.
     String            getItemID()      { return itemID;      }
     BigDecimal        getPrice()       { return price;       }
     String            getTitle()       { return title;       }
     String            getDescription() { return description; }
     ReviewStats       getReviewStats() { return reviewStats; }
-    ArrayList<Review> getReviews()     { return reviews;     }
     String            getProductURL()  { return productURL;  }
     String            getImageURL()    { return imageURL;    }
     boolean           hasInfo()        { return hasInfo;     }

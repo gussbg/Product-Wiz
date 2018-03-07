@@ -1,5 +1,7 @@
 package gussproductions.productwiz;
 
+import java.io.Serializable;
+
 /**
  * This ReviewStatics class encapsulates all the attributes regarding reviews such as
  * the average rating, the number of stars per star ranking, and the total number of stars.
@@ -7,7 +9,7 @@ package gussproductions.productwiz;
  * @author Brendon Guss
  * @since  01/4/2018
  */
-class ReviewStats
+class ReviewStats implements Serializable
 {
     private Integer[] numStars;
     private Integer   totalStars;

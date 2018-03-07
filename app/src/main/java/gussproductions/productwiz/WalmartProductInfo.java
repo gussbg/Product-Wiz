@@ -31,7 +31,7 @@ class WalmartProductInfo extends ProductInfo
 
         try
         {
-            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla/5.0")
+            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla")
                                               .ignoreHttpErrors(true).ignoreContentType(true).get();
             Element unparsedProduct    = productResultPage.select("item").first();
 
@@ -46,10 +46,7 @@ class WalmartProductInfo extends ProductInfo
                     description = unparsedProduct.getElementsByTag("shortDescription").text();
                     productURL  = unparsedProduct.getElementsByTag("productUrl").text();
                     imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
-                    reviews     = new ArrayList<>();
                     hasInfo     = true;
-
-                    setReviewStats();
                 }
                 else
                 {
@@ -71,7 +68,7 @@ class WalmartProductInfo extends ProductInfo
     /**
      * Walmart review statistics are set using this method.
      */
-    private void setReviewStats()
+    void setReviewStats()
     {
         if (hasInfo)
         {
@@ -84,7 +81,7 @@ class WalmartProductInfo extends ProductInfo
 
             try
             {
-                Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0")
+                Document reviewResultPage = Jsoup.connect(curReviewURL).userAgent("Mozilla")
                                                  .ignoreHttpErrors(true).ignoreContentType(true).get();
 
                 // Handles the rare case where the API gives an error.
@@ -126,12 +123,16 @@ class WalmartProductInfo extends ProductInfo
     /**
      * Parses the next review page. This method has no effect if there are no reviews or product information.
      */
-    void parseNextReviewPage()
+    ArrayList<Review> getMoreReviews()
     {
-        if (hasInfo)
+        ArrayList<Review> reviews = new ArrayList<>();
+
+        if (hasInfo && curReviewURL != null && curReviewURL.equals(""))
         {
             try
             {
+                System.out.println("curReviewURL:                                                           " + curReviewURL);
+
                 Document reviewResultPage = Jsoup.connect(curReviewURL)
                                                  .userAgent("Mozilla/5.0").ignoreHttpErrors(true)
                                                  .ignoreContentType(true).get();
@@ -139,7 +140,7 @@ class WalmartProductInfo extends ProductInfo
                 // Handles the rare case where the API gives an error.
                 if (reviewResultPage.getElementsByTag("title").text().equals("Error"))
                 {
-                    return;
+                    return reviews;
                 }
 
                 Elements unparsedReviews = reviewResultPage.getElementsByTag("review");
@@ -171,5 +172,7 @@ class WalmartProductInfo extends ProductInfo
                 ioe.printStackTrace();
             }
         }
+
+        return reviews;
     }
 }

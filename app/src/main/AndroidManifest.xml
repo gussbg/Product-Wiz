@@ -33,8 +33,6 @@
             android:theme="@style/CameraCaptureTheme"/>
 
         <activity android:name="gussproductions.productwiz.ViewProductActivity" />
-
-
     </application>
 
 </manifest>

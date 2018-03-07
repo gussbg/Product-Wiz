@@ -43,7 +43,7 @@ class EbayProductInfo extends ProductInfo
 
         try
         {
-            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla/5.0")
+            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla")
                                               .ignoreHttpErrors(true).ignoreContentType(true).get();
             Element  unparsedProduct   = productResultPage.getElementsByTag("item").first();
 
@@ -56,7 +56,6 @@ class EbayProductInfo extends ProductInfo
                 title      = unparsedProduct.getElementsByTag("title").text();
                 productURL = unparsedProduct.getElementsByTag("viewItemURL").text();
                 imageURL   = unparsedProduct.getElementsByTag("pictureURLSuperSize").text();
-                reviews    = new ArrayList<>();
                 hasInfo    = true;
             }
             else
@@ -83,7 +82,7 @@ class EbayProductInfo extends ProductInfo
 
             try
             {
-                Document itemInfoResultPage      = Jsoup.connect(requestURL).userAgent("Mozilla/5.0")
+                Document itemInfoResultPage      = Jsoup.connect(requestURL).userAgent("Mozilla")
                                                         .ignoreHttpErrors(true).ignoreContentType(true).get();
                 Element  unparsedItemDescription = itemInfoResultPage.getElementsByTag("Description").first();
 
@@ -106,11 +105,11 @@ class EbayProductInfo extends ProductInfo
      */
     void setReviewStats()
     {
-        if (hasInfo && hasReviews)
+        if (hasInfo)
         {
             try
             {
-                Document reviewResultPage = Jsoup.connect(productURL).userAgent("Mozilla/5.0")
+                Document reviewResultPage = Jsoup.connect(productURL).userAgent("Mozilla")
                                                  .ignoreHttpErrors(true).ignoreContentType(true).get();
 
                 // Determines if there are review statistics to parse.
@@ -128,6 +127,7 @@ class EbayProductInfo extends ProductInfo
                     }
 
                     reviewStats = new ReviewStats(numStars);
+                    hasReviews = true;
                 }
                 else
                 {
@@ -144,17 +144,21 @@ class EbayProductInfo extends ProductInfo
     /**
      * Parses all of the reviews on the next review page of an eBay product.
      */
-    void parseNextReviewPage()
+    ArrayList<Review> getMoreReviews()
     {
+        ArrayList<Review> reviews = new ArrayList<>();
+
         if (hasInfo && hasReviews)
         {
+            System.out.println("ebay reviews!");
+
             setReviewPage();
 
             DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
             try
             {
-                Document reviewPage      = Jsoup.connect(curReviewURL).userAgent("Mozilla/5.0")
+                Document reviewPage      = Jsoup.connect(curReviewURL).userAgent("Mozilla")
                                                 .ignoreHttpErrors(true).ignoreContentType(true).get();
                 Elements unparsedReviews = reviewPage.getElementsByClass("ebay-review-section");
 
@@ -196,6 +200,8 @@ class EbayProductInfo extends ProductInfo
                 ioe.printStackTrace();
             }
         }
+
+        return reviews;
     }
 
     /**
@@ -211,7 +217,7 @@ class EbayProductInfo extends ProductInfo
             {
                 try
                 {
-                    Document productPage       = Jsoup.connect(productURL).userAgent("Mozilla/5.0")
+                    Document productPage       = Jsoup.connect(productURL).userAgent("Mozilla")
                                                       .ignoreHttpErrors(true).ignoreContentType(true).get();
                     Element  unparsedReviewURL = productPage.getElementsByClass("sar-btn right").first();
 

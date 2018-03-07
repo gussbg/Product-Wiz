@@ -1,7 +1,11 @@
 package gussproductions.productwiz;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -78,21 +82,19 @@ public class ExampleUnitTest
         for (Product product : productSet)
         {
             product.getWalmartProductInfo().getReviewStats();
-            product.getWalmartProductInfo().parseNextReviewPage();
-            product.getWalmartProductInfo().parseNextReviewPage();
+            product.getWalmartProductInfo().getMoreReviews();
+            product.getWalmartProductInfo().getMoreReviews();
 
             product.getEbayProductInfo().setDescription();
             product.getEbayProductInfo().setReviewStats();
-            product.getEbayProductInfo().parseNextReviewPage();
-            product.getEbayProductInfo().parseNextReviewPage();
+            product.getEbayProductInfo().getMoreReviews();
+            product.getEbayProductInfo().getMoreReviews();
 
             product.getAmazonProductInfo().setReviewStats();
-            product.getAmazonProductInfo().parseNextReviewPage();
-            product.getAmazonProductInfo().parseNextReviewPage();
+            product.getAmazonProductInfo().getMoreReviews();
+            product.getAmazonProductInfo().getMoreReviews();
 
             product.getBestbuyProductInfo().getReviewStats();
-            product.getBestbuyProductInfo().parseNextReviewPage();
-            product.getBestbuyProductInfo().parseNextReviewPage();
         }
     }
 
@@ -100,5 +102,34 @@ public class ExampleUnitTest
     public void test_ebay_request()
     {
         EbayRequestHelper ebayRequestHelper = new EbayRequestHelper("811571016587", EbayRequestMode.FIND_ITEMS_BY_PRODUCT);
+    }
+
+    @Test
+    public void test_product_reviews()
+    {
+        Product product = new Product("846042007603"); //846042007603
+
+        product.setReviewStats();
+
+        System.out.println(product.getAmazonProductInfo().getTitle());
+
+        ArrayList<Review> reviews = product.getMoreReviews();
+
+        for (Review review : reviews)
+        {
+            System.out.println(review.getReviewTitle());
+        }
+
+        System.out.println(reviews.size());
+
+        System.out.println(product.getBestbuyProductInfo().curReviewURL);
+    }
+
+    @Test
+    public void test_jsoup() throws IOException {
+        URL productURL = new URL("https://api.bestbuy.com/click/-/5878703/pdp");
+
+        Document productPage       = Jsoup.connect("https://api.bestbuy.com/click/-/5878703/pdp").userAgent("Mozilla/5.0")
+                .ignoreHttpErrors(true).ignoreContentType(true).get();
     }
 }

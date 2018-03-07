@@ -86,7 +86,7 @@ class AmazonProductSearch
 
                     responseURL = amazonRequestHelper.getRequestURL();
 
-                    Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0")
+                    Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla")
                             .ignoreHttpErrors(true).ignoreContentType(true).get();
                     Elements unparsedProducts  = productResultPage.select("Item");
 
@@ -140,7 +140,7 @@ class AmazonProductSearch
 
             try
             {
-                Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0")
+                Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla")
                                                   .ignoreHttpErrors(true).ignoreContentType(true).get();
                 Element  totalPagesElement = productResultPage.selectFirst("TotalPages");
                          totalPageNum      = Integer.parseInt(totalPagesElement.text());

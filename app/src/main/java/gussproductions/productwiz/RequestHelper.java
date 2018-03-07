@@ -43,7 +43,7 @@ class RequestHelper
     }
 
     // All strings are handled as UTF-8.
-    final String UTF8_CHARSET = "UTF-8";
+    final static String UTF8_CHARSET = "UTF-8";
 
     /**
      * Canonicalize the query string as required by Amazon.
@@ -86,7 +86,7 @@ class RequestHelper
      * @param str decoded string
      * @return  encoded string per RFC 3986
      */
-    String percentEncodeRfc3986(String str)
+    static String percentEncodeRfc3986(String str)
     {
         String out;
 

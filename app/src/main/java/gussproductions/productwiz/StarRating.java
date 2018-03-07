@@ -46,8 +46,5 @@ enum StarRating
         return valueMap.get(starRating);
     }
 
-    Integer getValue()
-    {
-        return value;
-    }
+    Integer getValue() { return value; }
 }

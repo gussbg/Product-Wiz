@@ -47,7 +47,7 @@ class AmazonProductInfo extends ProductInfo
         {
             AmazonRequestHelper amazonRequestHelper = new AmazonRequestHelper(upc, AmazonRequestMode.ITEM_LOOKUP_INFO);
             String              requestURL          = amazonRequestHelper.getRequestURL();
-            Document            productResultPage   = Jsoup.connect(requestURL).userAgent("Mozilla/5.0")
+            Document            productResultPage   = Jsoup.connect(requestURL).userAgent("Mozilla")
                                                            .ignoreHttpErrors(true).ignoreContentType(true).get();
 
             // Only the first Item element is set in case multiple results are returned, although this is not expected.
@@ -107,7 +107,6 @@ class AmazonProductInfo extends ProductInfo
             imageURL = null;
         }
 
-        reviews = new ArrayList<>();
         hasInfo = true;
     }
 
@@ -130,7 +129,7 @@ class AmazonProductInfo extends ProductInfo
 
         try
         {
-            reviewIFrame        = Jsoup.connect(reviewIframe).userAgent("Mozilla/5.0").ignoreHttpErrors(true)
+            reviewIFrame        = Jsoup.connect(reviewIframe).userAgent("Mozilla").ignoreHttpErrors(true)
                                        .ignoreContentType(true).get();
             unparsedReviewStats = reviewIFrame.getElementsByClass("crIFrameHeaderHistogram").first();
 
@@ -194,7 +193,7 @@ class AmazonProductInfo extends ProductInfo
         {
             requestHelper     = new AmazonRequestHelper(asin, AmazonRequestMode.ITEM_LOOKUP_REVIEWS);
             responseURL       = requestHelper.getRequestURL();
-            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla/5.0").ignoreHttpErrors(true)
+            reviewResultsPage = Jsoup.connect(responseURL).userAgent("Mozilla").ignoreHttpErrors(true)
                                      .ignoreContentType(true).get();
             reviewIFrame      = reviewResultsPage.getElementsByTag("IFrameURL").text();
         }
@@ -209,11 +208,14 @@ class AmazonProductInfo extends ProductInfo
     /**
      * Parses all of the reviews on the next review page of an Amazon product.
      */
-    void parseNextReviewPage()
+    ArrayList<Review> getMoreReviews()
     {
+        ArrayList<Review> reviews = new ArrayList<>();
+
         // If there are no reviews to parse, this method does nothing and no reviews are set.
-        if (curReviewURL != null)
+        if (curReviewURL != null && hasInfo)
         {
+
             try
             {
                 Document   reviewPage       = Jsoup.connect(curReviewURL).ignoreHttpErrors(true)
@@ -300,5 +302,7 @@ class AmazonProductInfo extends ProductInfo
                 ioe.printStackTrace();
             }
         }
+
+        return reviews;
     }
 }

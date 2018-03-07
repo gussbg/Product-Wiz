@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity
     ProgressBar progressBar;
     ProgressBar mainProgressBar;
     TextView    noProductsMessage;
+    SearchView  searchView;
 
     private final int PRODUCT_LOADER_ID = 1;
     private final int AMAZON_SEARCH_LOADER_ID = 2;
@@ -72,7 +74,10 @@ public class MainActivity extends AppCompatActivity
         {
             noProductsMessage.setVisibility(View.GONE);
 
+
             productListAdapter.clear();
+
+
 
             query = intent.getStringExtra(SearchManager.QUERY);
 
@@ -95,10 +100,40 @@ public class MainActivity extends AppCompatActivity
             listView.setAdapter(productListAdapter);
             listView.setVisibility(View.GONE);
 
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
+            {
+                Intent intent = new Intent(context, ViewProductActivity.class);
+
+                intent.putExtra(getResources().getString(R.string.calling_activity), getResources().getString(R.string.main_activity_class));
+
+                Product product = (Product) arg0.getItemAtPosition(position);
+
+                System.out.println(product.getUPC());
+
+
+
+                intent.putExtra(getResources().getString(R.string.product_data), product);
+
+                context.startActivity(intent);
+            }
+        });
+
+
+
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
             getLoaderManager().restartLoader(AMAZON_SEARCH_LOADER_ID, null, amazonSearchLoaderListener);
+            searchView.clearFocus();
         }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        searchView.clearFocus();
     }
 
     @Override
@@ -113,7 +148,7 @@ public class MainActivity extends AppCompatActivity
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.menuSearch).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.menuSearch).getActionView();
 
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -121,10 +156,12 @@ public class MainActivity extends AppCompatActivity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                // collapse the view ?
-                //menu.findItem(R.id.menu_search).collapseActionView();
+            public boolean onQueryTextSubmit(String query)
+            {
                 productListAdapter.clear();
+
+                listView.removeFooterView(btnLoadMore);
+                searchView.clearFocus();
 
                 return false;
             }
@@ -137,7 +174,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         return true;
-
     }
 
     @Override
@@ -180,8 +216,11 @@ public class MainActivity extends AppCompatActivity
             }
             else if (products.size() < 10)
             {
-                listView.setVisibility(View.VISIBLE);
                 listView.removeFooterView(btnLoadMore);
+                listView.setVisibility(View.VISIBLE);
+
+
+
             }
             else
             {
@@ -196,7 +235,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override public void onLoaderReset(Loader<ArrayList<Product>> productListLoader)
         {
-            productListAdapter.setData(null);
+            productListAdapter.clear();
         }
     };
 

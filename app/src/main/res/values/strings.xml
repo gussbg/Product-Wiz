@@ -17,5 +17,10 @@
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
     <string name="product_image_text">"Product Image"</string>
+    <string name="main_activity_class">"MainActivity"</string>
+    <string name="barcode_capture_activity_class">"BarcodeCaptureActivity"</string>
+    <string name="calling_activity">"CallingActivity"</string>
+    <string name="product_data">"ProductData"</string>
+    <string name="load_more_reviews">"Load More Reviews"</string>
 
 </resources>
