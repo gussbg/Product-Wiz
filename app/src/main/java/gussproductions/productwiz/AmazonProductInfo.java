@@ -36,6 +36,8 @@ import org.jsoup.select.Elements;
  */
 class AmazonProductInfo extends ProductInfo
 {
+    final static int REVIEW_PAGE_MAX_SIZE = 10;
+
     /**
      * Sets the Amazon product information given a UPC (if the product is listed on Amazon).
      */

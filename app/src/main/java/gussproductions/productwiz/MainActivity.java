@@ -146,6 +146,8 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_search, menu);
 
+        final MenuItem searchItem = menu.findItem(R.id.viewBookmarks);
+
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.menuSearch).getActionView();
@@ -153,8 +155,30 @@ public class MainActivity extends AppCompatActivity
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
+        // Detect SearchView icon clicks
+        searchView.setOnSearchClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                searchItem.setVisible(false);
+            }
+        });
+        // Detect SearchView close
+        searchView.setOnCloseListener(new SearchView.OnCloseListener()
+        {
+            @Override
+            public boolean onClose()
+            {
+                searchItem.setVisible(true);
+                return false;
+            }
+        });
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
+
+
             @Override
             public boolean onQueryTextSubmit(String query)
             {
@@ -181,9 +205,15 @@ public class MainActivity extends AppCompatActivity
     {
         if (item.getItemId() == R.id.barcodeScan)
         {
-            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+            Intent scanBarcode = new Intent(this, BarcodeCaptureActivity.class);
 
-            this.startActivity(intent);
+            this.startActivity(scanBarcode);
+        }
+        else if (item.getItemId() == R.id.viewBookmarks)
+        {
+            Intent viewBookmarks = new Intent(this, ViewBookmarksActivity.class);
+
+            this.startActivity(viewBookmarks);
         }
 
         return true;
@@ -218,9 +248,6 @@ public class MainActivity extends AppCompatActivity
             {
                 listView.removeFooterView(btnLoadMore);
                 listView.setVisibility(View.VISIBLE);
-
-
-
             }
             else
             {

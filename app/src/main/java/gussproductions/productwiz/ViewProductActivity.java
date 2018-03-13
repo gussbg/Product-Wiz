@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -144,7 +146,7 @@ public class ViewProductActivity extends AppCompatActivity
 
         //imageView.setImageBitmap(product.getImage());
 
-        getLoaderManager().restartLoader(0, null, productLoaderListener ).forceLoad();
+        getLoaderManager().restartLoader(0, null, productLoaderListener).forceLoad();
     }
 
     @Override
@@ -266,7 +268,7 @@ public class ViewProductActivity extends AppCompatActivity
             loadReviews.setVisibility(View.GONE);
             reviewList.removeFooterView(reviewProgress);
 
-            if (reviews.size() == 0)
+            if (!product.hasMoreReviews())
             {
                 reviewList.removeFooterView(loadMoreReviews);
             }

@@ -1,20 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/ActionButtonStyle">
+
+
 
     <item
         android:id="@+id/menuSearch"
         android:title="Search"
+
         android:icon="@drawable/search_products"
+
         app:actionViewClass="android.support.v7.widget.SearchView"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
-        android:id="@+id/barcodeScan"
-        android:title="Scan Barcode"
-        android:icon="@drawable/barcode_scan"
+    android:id="@+id/barcodeScan"
+    android:title="Scan Barcode"
 
-        app:showAsAction="ifRoom" />
+    android:icon="@drawable/barcode_scan"
+
+    app:showAsAction="always" />
+
+    <item
+        android:id="@+id/viewBookmarks"
+        android:title="View Bookmarks"
+
+        android:icon="@drawable/view_bookmarks"
+
+        app:showAsAction="always" />
 
 
 </menu>

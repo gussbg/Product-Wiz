@@ -63,7 +63,28 @@ public class ExampleUnitTest
     @Test
     public void test_walmart_info()
     {
-        WalmartProductInfo walmartProductInfo = new WalmartProductInfo("035000521019");
+        WalmartProductInfo walmartProductInfo = new WalmartProductInfo("811571016587");
+
+        walmartProductInfo.setReviewStats();
+
+        ArrayList<Review> reviews = walmartProductInfo.getMoreReviews();
+
+        System.out.println(walmartProductInfo.getProductURL());
+    }
+
+    @Test
+    public void test_walmart_only_product()
+    {
+        Product product = new Product("811571016587");
+
+        product.setReviewStats();
+
+        ArrayList<Review> reviews = product.getMoreReviews();
+
+        for (Review review : reviews)
+        {
+            System.out.println(review.getReviewTitle());
+        }
     }
 
     @Test
@@ -131,5 +152,26 @@ public class ExampleUnitTest
 
         Document productPage       = Jsoup.connect("https://api.bestbuy.com/click/-/5878703/pdp").userAgent("Mozilla/5.0")
                 .ignoreHttpErrors(true).ignoreContentType(true).get();
+    }
+
+    @Test
+    public void test_ebay_reviews()
+    {
+        Product product = new Product("786936856255");
+
+        System.out.println(product.getEbayProductInfo().productURL);
+
+        product.setReviewStats();
+
+
+
+        ArrayList<Review> reviews = product.getEbayProductInfo().getMoreReviews();
+
+
+        for (Review review : reviews)
+        {
+            System.out.println(review.getReviewTitle());
+        }
+
     }
 }

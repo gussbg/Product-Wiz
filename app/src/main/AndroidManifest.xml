@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="gussproductions.productwiz">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-feature android:name="android.hardware.camera" />
 
     <uses-permission android:name="android.permission.CAMERA" />
@@ -13,26 +15,33 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/ProductWizTheme">
-
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
-        <activity android:name="gussproductions.productwiz.MainActivity"
-            android:launchMode="singleTop" >
+
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEARCH" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable"/>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
-
-        <activity android:name="gussproductions.productwiz.BarcodeCaptureActivity"
-            android:theme="@style/CameraCaptureTheme"/>
-
-        <activity android:name="gussproductions.productwiz.ViewProductActivity" />
+        <activity
+            android:name=".BarcodeCaptureActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/CameraCaptureTheme" />
+        <activity
+            android:name=".ViewProductActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ViewBookmarksActivity"></activity>
     </application>
 
 </manifest>

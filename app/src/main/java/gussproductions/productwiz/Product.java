@@ -31,6 +31,11 @@ class Product implements Serializable
     private WalmartProductInfo walmartProductInfo;
     private BestbuyProductInfo bestbuyProductInfo;
     private EbayProductInfo    ebayProductInfo;
+    private BookmarkedProduct  bookmarkedProduct;
+    private int                amazonReviewsDelivered;
+    private int                ebayReviewsDelivered;
+    private int                walmartReviewsDelivered;
+    private boolean            hasMoreReviews;
 
     Product(AmazonProductInfo amazonProductInfo, String upc)
     {
@@ -50,6 +55,16 @@ class Product implements Serializable
         this.ebayProductInfo    = new EbayProductInfo(upc);
     }
 
+    Product(String upc, BookmarkedProduct bookmarkedProduct)
+    {
+        this.upc                = upc;
+        this.bookmarkedProduct  = bookmarkedProduct;
+        this.amazonProductInfo  = new AmazonProductInfo(upc);
+        this.walmartProductInfo = new WalmartProductInfo(upc);
+        this.bestbuyProductInfo = new BestbuyProductInfo(upc);
+        this.ebayProductInfo    = new EbayProductInfo(upc);
+    }
+
     // Getter methods.
     String             getUPC()                   { return upc;                   }
     Bitmap             getImage()                 { return image.bitmap;          }
@@ -60,6 +75,8 @@ class Product implements Serializable
     WalmartProductInfo getWalmartProductInfo()    { return walmartProductInfo;    }
     BestbuyProductInfo getBestbuyProductInfo()    { return bestbuyProductInfo;    }
     EbayProductInfo    getEbayProductInfo()       { return ebayProductInfo;       }
+    BookmarkedProduct  getBookmarkedProduct()     { return bookmarkedProduct;     }
+    boolean            hasMoreReviews()           { return hasMoreReviews;        }
 
     void setImage()
     {
@@ -97,9 +114,18 @@ class Product implements Serializable
 
     void setLowestPriceInfo()
     {
-        lowestPrice           = amazonProductInfo.getPrice();
-        lowestPriceRetailer   = Retailer.AMAZON;
-        lowestPriceProductURL = amazonProductInfo.getProductURL();
+        final BigDecimal MAX_PRICE = new BigDecimal(999999999);
+
+        if (amazonProductInfo.hasInfo())
+        {
+            lowestPrice           = amazonProductInfo.getPrice();
+            lowestPriceRetailer   = Retailer.AMAZON;
+            lowestPriceProductURL = amazonProductInfo.getProductURL();
+        }
+        else
+        {
+            lowestPrice = MAX_PRICE;
+        }
 
         if (bestbuyProductInfo.hasInfo() && lowestPrice.compareTo(bestbuyProductInfo.getPrice()) == 1)
         {
@@ -123,13 +149,9 @@ class Product implements Serializable
 
     void setReviewStats()
     {
-        System.out.println("method entry");
-
         if (amazonProductInfo.hasInfo())
         {
             amazonProductInfo.setReviewStats();
-
-            System.out.print("reviewstatsset");
         }
 
         if (ebayProductInfo.hasInfo())
@@ -155,24 +177,49 @@ class Product implements Serializable
     ArrayList<Review> getMoreReviews()
     {
         ArrayList<Review> combinedReviews = new ArrayList<>();
+        ArrayList<Review> amazonReviews;
+        ArrayList<Review> ebayReviews;
+        ArrayList<Review> walmartReviews;
 
-        //setReviewStats();
+        amazonReviews  = amazonProductInfo.getMoreReviews();
+        ebayReviews    = ebayProductInfo.getMoreReviews();
+        walmartReviews = walmartProductInfo.getMoreReviews();
 
-        //combinedReviews = amazonProductInfo.getMoreReviews();
+        combinedReviews.addAll(amazonReviews);
+        combinedReviews.addAll(ebayReviews);
+        combinedReviews.addAll(walmartReviews);
 
-        combinedReviews.addAll(amazonProductInfo.getMoreReviews());
-        combinedReviews.addAll(ebayProductInfo.getMoreReviews());
-        combinedReviews.addAll(walmartProductInfo.getMoreReviews());
-
-        //System.out.println("review count: " + combinedReviews.size());
-
-
-
-        //System.out.println("upc: " + upc);
-
+        amazonReviewsDelivered  = amazonReviews.size();
+        ebayReviewsDelivered    = ebayReviews.size();
+        walmartReviewsDelivered = walmartReviews.size();
 
         Collections.shuffle(combinedReviews);
 
+        hasMoreReviews = hasMoreReviews(combinedReviews);
+
         return combinedReviews;
+    }
+
+    private boolean hasMoreReviews(ArrayList<Review> deliveredReviews)
+    {
+        if (walmartProductInfo.hasInfo() && amazonReviewsDelivered == 0 && ebayReviewsDelivered == 0
+                && walmartReviewsDelivered < WalmartProductInfo.REVIEW_PAGE_MAX_SIZE)
+        {
+            return false;
+        }
+
+        if (amazonProductInfo.hasInfo() && ebayReviewsDelivered == 0 && walmartReviewsDelivered == 0
+                && amazonReviewsDelivered < AmazonProductInfo.REVIEW_PAGE_MAX_SIZE)
+        {
+            return false;
+        }
+
+        if (ebayProductInfo.hasInfo() && amazonReviewsDelivered == 0 && walmartReviewsDelivered == 0
+                && ebayReviewsDelivered < EbayProductInfo.REVIEW_PAGE_MAX_SIZE)
+        {
+            return false;
+        }
+
+        return deliveredReviews.size() != 0;
     }
 }

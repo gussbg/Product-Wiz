@@ -52,6 +52,7 @@ class BestbuyProductInfo extends ProductInfo
 
                 price             = new BigDecimal(unparsedProduct.getElementsByTag("salePrice")
                                                                   .text().replaceAll(",", ""));
+                System.out.println("Price:                      " + price.toString());
                 itemID            = unparsedProduct.getElementsByTag("sku").text();
                 productURL        = unparsedProduct.getElementsByTag("url").text();
                 title             = unparsedProduct.getElementsByTag("name").text();

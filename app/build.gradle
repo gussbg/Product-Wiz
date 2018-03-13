@@ -31,4 +31,5 @@ dependencies {
     compile 'com.android.support:support-v4:26.1.0'
     // Important - the CameraSource implementation in this project requires version 8.1 or higher.
     compile 'com.google.android.gms:play-services-vision:11.8.0'
+    compile 'com.google.code.gson:gson:2.7'
 }

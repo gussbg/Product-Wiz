@@ -23,8 +23,8 @@ public class ReviewListLoader extends AsyncTaskLoader<ArrayList<Review>>
 
     @Override public ArrayList<Review> loadInBackground()
     {
-        reviewList = product.getMoreReviews(); //024543023920
-
+        reviewList = product.getMoreReviews();
+        
         return reviewList;
     }
 

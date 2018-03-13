@@ -22,5 +22,9 @@
     <string name="calling_activity">"CallingActivity"</string>
     <string name="product_data">"ProductData"</string>
     <string name="load_more_reviews">"Load More Reviews"</string>
+    <string name="product_details">"Product Details"</string>
+
+
+
 
 </resources>

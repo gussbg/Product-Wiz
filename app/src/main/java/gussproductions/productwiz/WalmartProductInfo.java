@@ -24,6 +24,8 @@ import java.util.ArrayList;
  */
 class WalmartProductInfo extends ProductInfo
 {
+    final static int REVIEW_PAGE_MAX_SIZE = 5;
+
     WalmartProductInfo(String upc)
     {
         WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(upc);
@@ -127,12 +129,10 @@ class WalmartProductInfo extends ProductInfo
     {
         ArrayList<Review> reviews = new ArrayList<>();
 
-        if (hasInfo && curReviewURL != null && curReviewURL.equals(""))
+        if (hasInfo && curReviewURL != null && !curReviewURL.equals(""))
         {
             try
             {
-                System.out.println("curReviewURL:                                                           " + curReviewURL);
-
                 Document reviewResultPage = Jsoup.connect(curReviewURL)
                                                  .userAgent("Mozilla/5.0").ignoreHttpErrors(true)
                                                  .ignoreContentType(true).get();

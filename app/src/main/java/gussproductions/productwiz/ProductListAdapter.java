@@ -1,9 +1,14 @@
 package gussproductions.productwiz;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +19,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Created by Brendon on 2/13/2018.
@@ -28,15 +36,12 @@ import java.util.Collection;
 class ProductListAdapter extends ArrayAdapter<Product>
 {
     private Context context;
-    private ArrayList<Boolean> animationStates;
 
     ProductListAdapter(Context context)
     {
         super(context, android.R.layout.simple_list_item_2);
 
-        animationStates = new ArrayList<>();
-
-        this.context    = context;
+        this.context = context;
     }
 
     public void setData(ArrayList<Product> products)
@@ -54,6 +59,14 @@ class ProductListAdapter extends ArrayAdapter<Product>
     @Override public View getView(int position, View convertView, @NonNull ViewGroup parent)
     {
         View view;
+        final SharedPreferences sharedPref;
+        final SharedPreferences.Editor editor;
+
+        sharedPref = context.getSharedPreferences("gussproductions.productwiz", Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+        final Gson gson = new Gson();
+
+
 
         final LayoutInflater mInflater = LayoutInflater.from(context);
 
@@ -67,6 +80,9 @@ class ProductListAdapter extends ArrayAdapter<Product>
         }
 
         final Product product = getItem(position);
+
+
+
         DecimalFormat decimalFormat = new DecimalFormat("$#,##0.00");
         String formattedPrice = decimalFormat.format(product.getLowestPrice());
 
@@ -84,6 +100,8 @@ class ProductListAdapter extends ArrayAdapter<Product>
 
         ImageButton buyButton = view.findViewById(R.id.listBuyButton);
 
+
+
         buyButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -91,6 +109,77 @@ class ProductListAdapter extends ArrayAdapter<Product>
             {
                 Intent viewProductWebpage = new Intent (Intent.ACTION_VIEW, Uri.parse(product.getLowestPriceProductURL()));
                 context.startActivity(viewProductWebpage);
+            }
+        });
+
+        final ImageButton addBookmark = view.findViewById(R.id.addBookmark);
+        final ImageButton bookmarkAddedBtn = view.findViewById(R.id.bookmarkAdded);
+
+        final ImageView imageBuffer = view.findViewById(R.id.buttonBuffer);
+        imageBuffer.setVisibility(View.VISIBLE);
+
+        String value = sharedPref.getString(product.getUPC(), "-1");
+
+        System.out.println(value);
+
+        if (value.equals("-1"))
+        {
+            System.out.println("                    Product not bookmarked!");
+
+            bookmarkAddedBtn.setVisibility(View.GONE);
+            addBookmark.setVisibility(View.VISIBLE);
+
+        }
+        else
+        {
+            System.out.println("product bookmarked!!");
+
+            addBookmark.setVisibility(View.GONE);
+            bookmarkAddedBtn.setVisibility(View.VISIBLE);
+        }
+
+        addBookmark.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                BookmarkedProduct bookmarkedProduct = new BookmarkedProduct(product.getUPC(), new Date(), product.getLowestPrice());
+
+                String json = gson.toJson(bookmarkedProduct);
+
+
+                editor.putString(product.getUPC(), json);
+                editor.apply();
+
+
+
+                addBookmark.setVisibility(View.GONE);
+                bookmarkAddedBtn.setVisibility(View.VISIBLE);
+
+                Snackbar snackbar = Snackbar.make(view , "Bookmark Added",
+                            Snackbar.LENGTH_LONG);
+
+                snackbar.getView().setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                snackbar.show();
+            }
+        });
+
+        bookmarkAddedBtn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                editor.remove(product.getUPC());
+                editor.apply();
+
+                addBookmark.setVisibility(View.VISIBLE);
+                bookmarkAddedBtn.setVisibility(View.GONE);
+
+                Snackbar snackbar = Snackbar.make(view , "Bookmark Removed",
+                        Snackbar.LENGTH_LONG);
+
+                snackbar.getView().setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                snackbar.show();
             }
         });
 
