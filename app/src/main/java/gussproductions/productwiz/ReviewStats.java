@@ -13,6 +13,7 @@ class ReviewStats implements Serializable
 {
     private Integer[] numStars;
     private Integer   totalStars;
+    private Integer   maxStarCount;
     private Double    averageRating;
 
     /**
@@ -24,6 +25,7 @@ class ReviewStats implements Serializable
         this.numStars      = numStars;
         this.totalStars    = calcTotalStars();
         this.averageRating = calcAverageRating();
+        this.maxStarCount  = calcMaxStarCount();
     }
 
     /**
@@ -42,8 +44,17 @@ class ReviewStats implements Serializable
      */
     private Double calcAverageRating()
     {
-        return (numStars[0] * 1.0 + numStars[1] * 2.0 + numStars[2] * 3.0 + numStars[3] * 4.0 + numStars[4] * 5.0)
+        Double averageRating;
+
+        averageRating = (numStars[0] * 1.0 + numStars[1] * 2.0 + numStars[2] * 3.0 + numStars[3] * 4.0 + numStars[4] * 5.0)
                 / totalStars;
+
+        if (averageRating.equals(Double.NaN))
+        {
+            averageRating = 0.0;
+        }
+
+        return averageRating;
     }
 
     /**
@@ -63,6 +74,37 @@ class ReviewStats implements Serializable
         return totalStars;
     }
 
+    void add(ReviewStats reviewStats)
+    {
+        if (reviewStats != null)
+        {
+            numStars[0] += reviewStats.getNumOneStars();
+            numStars[1] += reviewStats.getNumTwoStars();
+            numStars[2] += reviewStats.getNumThreeStars();
+            numStars[3] += reviewStats.getNumFourStars();
+            numStars[4] += reviewStats.getNumFiveStars();
+        }
+
+        this.totalStars    = calcTotalStars();
+        this.averageRating = calcAverageRating();
+        this.maxStarCount  = calcMaxStarCount();
+    }
+
+    Integer calcMaxStarCount()
+    {
+        Integer maxStarCount = 0;
+
+        for (int i = 0; i < 5; i++)
+        {
+            if (maxStarCount < numStars[i])
+            {
+                maxStarCount = numStars[i];
+            }
+        }
+
+        return maxStarCount;
+    }
+
     // Getter methods.
     public Integer getTotalStars()    { return totalStars;    }
     public Integer getNumOneStars()   { return numStars[0];   }
@@ -70,5 +112,9 @@ class ReviewStats implements Serializable
     public Integer getNumThreeStars() { return numStars[2];   }
     public Integer getNumFourStars()  { return numStars[3];   }
     public Integer getNumFiveStars()  { return numStars[4];   }
+    Integer getMaxStarCount()
+    {
+        return maxStarCount;
+    }
     public Double  getAverageRating() { return averageRating; }
 }

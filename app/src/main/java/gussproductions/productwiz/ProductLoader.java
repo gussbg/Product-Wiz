@@ -2,11 +2,9 @@ package gussproductions.productwiz;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.widget.ProgressBar;
 
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 
 /**
  * Created by Brendon on 2/20/2018.
@@ -17,36 +15,56 @@ class ProductLoader extends AsyncTaskLoader<Product>
     private Product product;
     private boolean productLoaded;
     private String  upc;
+    private WeakReference<ViewProductActivity> viewProductActivity;
 
-    ProductLoader(Context context, Product product)
+    ProductLoader(Context context, Product product, WeakReference<ViewProductActivity> viewProductActivity)
     {
         super(context);
 
         this.product = product;
+        this.viewProductActivity = viewProductActivity;
         productLoaded = true;
 
     }
 
-    ProductLoader(Context context, String upc)
+    ProductLoader(Context context, String upc, WeakReference<ViewProductActivity> viewProductActivity)
     {
         super(context);
         productLoaded = false;
         this.upc = upc;
+        this.viewProductActivity = viewProductActivity;
     }
 
     @Override public Product loadInBackground()
     {
+        ProgressBar mainProgressBar;
 
         if (!productLoaded)
         {
+            mainProgressBar = viewProductActivity.get().mainProgressBar;
+
+            mainProgressBar.setMax(100);
             product = new Product(upc);
-            product.setImage();
+            mainProgressBar.setProgress(30);
+
             product.setLowestPriceInfo();
+
+            product.setLargeImage();
+            mainProgressBar.setProgress(70);
+            product.setReviewStats();
+            mainProgressBar.setProgress(90);
+            product.setDescription();
         }
-
-        product.setReviewStats();
-        product.setEbayDescription();
-
+        else
+        {
+            viewProductActivity.get().mainProgressBar.setProgress(25);
+            product.setLargeImage();
+            viewProductActivity.get().mainProgressBar.setProgress(75);
+            product.setReviewStats();
+            viewProductActivity.get().mainProgressBar.setProgress(90);
+            product.setDescription();
+            viewProductActivity.get().mainProgressBar.setProgress(100);
+        }
 
         return product;
     }
@@ -69,11 +87,12 @@ class ProductLoader extends AsyncTaskLoader<Product>
      */
     @Override protected void onStartLoading()
     {
+        /*
         if (product != null)
         {
             deliverResult(product);
         }
-
+*/
         if (takeContentChanged() || product == null)
         {
             forceLoad();

@@ -4,6 +4,8 @@
 
 package gussproductions.productwiz;
 
+import android.widget.ProgressBar;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +13,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 
@@ -44,8 +47,9 @@ class WalmartProductInfo extends ProductInfo
                     itemID      = unparsedProduct.getElementsByTag("itemId").text();
                     price       = new BigDecimal(unparsedProduct.getElementsByTag("salePrice")
                                                      .text().replaceAll(",", ""));
+                    price       = price.setScale(2, RoundingMode.DOWN);
                     title       = unparsedProduct.getElementsByTag("name").text();
-                    description = unparsedProduct.getElementsByTag("shortDescription").text();
+                    description = unparsedProduct.getElementsByTag("shortDescription").text().replaceAll("<.*?>", "");
                     productURL  = unparsedProduct.getElementsByTag("productUrl").text();
                     imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
                     hasInfo     = true;
@@ -74,12 +78,17 @@ class WalmartProductInfo extends ProductInfo
     {
         if (hasInfo)
         {
+            curReviewPageNum = 1;
             WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper(itemID, curReviewPageNum);
 
             curReviewURL     = walmartRequestHelper.getRequestURL();
-            curReviewPageNum = 1;
 
             Integer numStars[] = new Integer[5];
+
+            for (int i = 0; i < 5; i++)
+            {
+                numStars[i] = 0;
+            }
 
             try
             {
@@ -94,7 +103,7 @@ class WalmartProductInfo extends ProductInfo
 
                 Elements unparsedRatings = reviewResultPage.getElementsByTag("ratingCounts");
 
-                // Review statistics are only generating if ratings can be found.
+                // Review statistics are only generated if ratings can be found.
                 if (unparsedRatings.size() != 0)
                 {
                     for (int i = 0; i < unparsedRatings.size(); i++)
@@ -112,6 +121,10 @@ class WalmartProductInfo extends ProductInfo
                         }
                     }
 
+                    reviewStats = new ReviewStats(numStars);
+                }
+                else
+                {
                     reviewStats = new ReviewStats(numStars);
                 }
             }
@@ -158,7 +171,7 @@ class WalmartProductInfo extends ProductInfo
                     // Each parsed review datum is added to a new review and added to the product's
                     // reviews, the date is always null since Walmart reviews do not have dates.
                     reviews.add(new Review(reviewTitle, reviewText, starRating, null
-                                                      , numHelpful, numUnhelpful));
+                                                      , numHelpful, numUnhelpful, Retailer.WALMART));
                 }
 
                 curReviewPageNum++;

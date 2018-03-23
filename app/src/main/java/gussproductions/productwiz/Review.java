@@ -17,9 +17,10 @@ class Review
     private Date       date;
     private Integer    numHelpful;
     private Integer    numUnhelpful;
+    private Retailer   retailer;
 
     Review(String reviewTitle, String reviewText, StarRating starRating, Date date, Integer numHelpful
-                             , Integer numUnhelpful)
+                             , Integer numUnhelpful, Retailer retailer)
     {
         this.reviewTitle  = reviewTitle;
         this.reviewText   = reviewText;
@@ -27,6 +28,7 @@ class Review
         this.date         = date;
         this.numHelpful   = numHelpful;
         this.numUnhelpful = numUnhelpful;
+        this.retailer     = retailer;
     }
 
     // Getter methods.
@@ -36,4 +38,5 @@ class Review
     Date       getDate()         { return date;         }
     Integer    getNumHelpful()   { return numHelpful;   }
     Integer    getNumUnhelpful() { return numUnhelpful; }
+    Retailer   getRetailer()     { return retailer;    }
 }

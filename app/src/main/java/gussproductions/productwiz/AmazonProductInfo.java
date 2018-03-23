@@ -7,6 +7,7 @@ package gussproductions.productwiz;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,7 @@ import org.jsoup.select.Elements;
 class AmazonProductInfo extends ProductInfo
 {
     final static int REVIEW_PAGE_MAX_SIZE = 10;
+    String smallImageURL;
 
     /**
      * Sets the Amazon product information given a UPC (if the product is listed on Amazon).
@@ -95,12 +97,24 @@ class AmazonProductInfo extends ProductInfo
 
         itemID      = unparsedProduct.getElementsByTag("ASIN").text();
         price       = new BigDecimal(unparsedPrice);
+        price       = price.setScale(2, RoundingMode.DOWN);
         title       = unparsedProduct.getElementsByTag("Title").text();
-        description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text();
+        description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text().replaceAll("<.*?>", "");
         productURL  = unparsedProduct.getElementsByTag("DetailPageURL").text();
 
         // Not all Amazon products have images, so the lack of an image is handled here.
-        if (unparsedProduct.getElementsByTag("LargeImage").first() != null)
+
+
+
+        if (unparsedProduct.getElementsByTag("HiResImage").size() == 2 && unparsedProduct.getElementsByTag("HiResImage").get(1) != null)
+        {
+            imageURL = unparsedProduct.getElementsByTag("HiResImage").get(1).select("URL").text();
+        }
+        else if (unparsedProduct.getElementsByTag("HiResImage").size() == 1 && unparsedProduct.getElementsByTag("HiResImage").get(0) != null)
+        {
+            imageURL = unparsedProduct.getElementsByTag("HiResImage").get(0).select("URL").text();
+        }
+        else if (unparsedProduct.getElementsByTag("LargeImage").first() != null)
         {
             imageURL = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
         }
@@ -108,6 +122,16 @@ class AmazonProductInfo extends ProductInfo
         {
             imageURL = null;
         }
+
+        if (unparsedProduct.getElementsByTag("LargeImage").first() != null && !unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text().equals(""))
+        {
+            smallImageURL = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
+        }
+        else
+        {
+            smallImageURL = null;
+        }
+
 
         hasInfo = true;
     }
@@ -129,6 +153,11 @@ class AmazonProductInfo extends ProductInfo
         totalNumReviews = 0;
         numStars        = new Integer[5];
 
+        for (int i = 0; i < 5; i++)
+        {
+            numStars[i] = 0;
+        }
+
         try
         {
             reviewIFrame        = Jsoup.connect(reviewIframe).userAgent("Mozilla").ignoreHttpErrors(true)
@@ -138,7 +167,7 @@ class AmazonProductInfo extends ProductInfo
             // No review statistics are set if none can be found.
             if (unparsedReviewStats == null)
             {
-                reviewStats  = null;
+                reviewStats  = new ReviewStats(numStars);
                 curReviewURL = null;
             }
             else
@@ -152,7 +181,7 @@ class AmazonProductInfo extends ProductInfo
                 // Regex Pattern for the percentage of a particular star rating (1 - 5).
                 Pattern ratingPercentagePattern = Pattern.compile(" star (.*?)%");
 
-                Matcher numReviewsMatcher      = numReviewsPattern.matcher(unparsedReviewStats.text());
+                Matcher numReviewsMatcher       = numReviewsPattern.matcher(unparsedReviewStats.text());
                 Matcher ratingPercentageMatcher = ratingPercentagePattern.matcher(unparsedReviewStats.text());
 
                 if (numReviewsMatcher.find())
@@ -160,7 +189,7 @@ class AmazonProductInfo extends ProductInfo
                     totalNumReviews = Integer.parseInt(numReviewsMatcher.group(1).replace(",", ""));
                 }
 
-                for (int i = 0; i < numStars.length && ratingPercentageMatcher.find(); i++)
+                for (int i = 4; i >= 0 && ratingPercentageMatcher.find(); i--)
                 {
                     // Calculate the number of stars given the
                     numStars[i] = (int) Math.round((Double.parseDouble(ratingPercentageMatcher.group(1)) / 100.0)
@@ -277,7 +306,7 @@ class AmazonProductInfo extends ProductInfo
                     // Each parsed review datum is added to a new review and added to the product's reviews, the
                     // number of unhelpful reviews is always zero since Amazon reviews do not have this metric.
                     reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful,
-                                           DEFAULT_UNHELPFUL_NUM));
+                                           DEFAULT_UNHELPFUL_NUM, Retailer.AMAZON));
                 }
 
                 String prevReviewPage = curReviewURL;

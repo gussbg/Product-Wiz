@@ -3,6 +3,8 @@ package gussproductions.productwiz;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
+import java.lang.ref.WeakReference;
+
 
 /**
  * Created by Brendon on 2/14/2018.
@@ -12,17 +14,19 @@ class AmazonSearchLoader extends AsyncTaskLoader<AmazonProductSearch>
 {
     private AmazonProductSearch amazonProductSearch;
     private String              searchKeywords;
+    private WeakReference<MainActivity> mainActivity;
 
-    AmazonSearchLoader(Context context, String searchKeywords)
+    AmazonSearchLoader(Context context, String searchKeywords, WeakReference<MainActivity> mainActivity)
     {
         super(context);
 
         this.searchKeywords = searchKeywords;
+        this.mainActivity = mainActivity;
     }
 
     @Override public AmazonProductSearch loadInBackground()
     {
-        amazonProductSearch = new AmazonProductSearch(searchKeywords);
+        amazonProductSearch = new AmazonProductSearch(searchKeywords, mainActivity);
 
         return amazonProductSearch;
     }

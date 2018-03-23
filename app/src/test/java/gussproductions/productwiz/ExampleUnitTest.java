@@ -40,12 +40,14 @@ public class ExampleUnitTest
 
         try
         {
-            amazonRequestHelper = new AmazonRequestHelper("035000521019", AmazonRequestMode.ITEM_LOOKUP_INFO);
+            amazonRequestHelper = new AmazonRequestHelper("841887035545", AmazonRequestMode.ITEM_LOOKUP_INFO);
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+
+        System.out.println(amazonRequestHelper.getRequestURL());
     }
 
     @Test
@@ -172,6 +174,39 @@ public class ExampleUnitTest
         {
             System.out.println(review.getReviewTitle());
         }
+
+    }
+
+    @Test
+    public void test_review_stats()
+    {
+        Product product = new Product("024543327868");
+
+        product.setImage(false);
+        product.setLowestPriceInfo();
+
+        product.setReviewStats();
+
+        ReviewStats reviewStats = product.getAmazonProductInfo().getReviewStats();
+
+        if (reviewStats == null)
+        {
+            System.out.println("Null!");
+        }
+
+        Integer numOneStars = reviewStats.getNumOneStars();
+        Integer numTwoStars = reviewStats.getNumTwoStars();
+        Integer numThreeStars = reviewStats.getNumThreeStars();
+        Integer numFourStars = reviewStats.getNumFourStars();
+        Integer numFiveStars = reviewStats.getNumFiveStars();
+
+        System.out.println(numOneStars);
+        System.out.println(numTwoStars);
+        System.out.println(numThreeStars);
+        System.out.println(numFourStars);
+        System.out.println(numFiveStars);
+
+        product.setDescription();
 
     }
 }

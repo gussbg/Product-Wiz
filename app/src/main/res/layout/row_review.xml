@@ -13,15 +13,110 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:textColor="@color/textColor"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
+        app:layout_constraintStart_toEndOf="@+id/reviewRating"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <RatingBar
-        android:id="@+id/ratingBar"
+    <android.support.v7.widget.AppCompatRatingBar
+        android:id="@+id/reviewRating"
+        style="?android:attr/ratingBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="8dp" />
+        android:numStars="5"
+        android:paddingTop="3dp"
+        android:stepSize="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/reviewDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textColor="@color/textColor"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbDownText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/thumbDownText" />
+
+    <TextView
+        android:id="@+id/reviewText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/textColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reviewTitle" />
+
+    <ImageView
+        android:id="@+id/thumbUpImage"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/thumb_up"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reviewText"
+        app:srcCompat="@drawable/thumb_up" />
+
+    <ImageView
+        android:id="@+id/thumbDownImage"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:src="@drawable/thumb_down"
+        android:visibility="visible"
+        app:layout_constraintStart_toEndOf="@+id/thumbUpText"
+        app:layout_constraintTop_toTopOf="@+id/thumbUpImage"
+        app:srcCompat="@drawable/thumb_down" />
+
+    <TextView
+        android:id="@+id/thumbUpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/textColor"
+        app:layout_constraintStart_toEndOf="@+id/thumbUpImage"
+        app:layout_constraintTop_toTopOf="@+id/thumbUpImage" />
+
+    <TextView
+        android:id="@+id/thumbDownText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/textColor"
+        app:layout_constraintStart_toEndOf="@+id/thumbDownImage"
+        app:layout_constraintTop_toTopOf="@+id/thumbDownImage" />
+
+    <ImageView
+        android:id="@+id/thumbBuffer"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/thumbDownText"
+        app:layout_constraintStart_toStartOf="@+id/thumbUpImage"
+        app:layout_constraintTop_toBottomOf="@+id/thumbUpImage" />
+
+    <ImageView
+        android:id="@+id/reviewRetailer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="fitStart"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbDownImage"
+        app:layout_constraintEnd_toStartOf="@+id/reviewDate"
+        app:layout_constraintStart_toEndOf="@+id/thumbDownText"
+        app:layout_constraintTop_toTopOf="@+id/thumbDownImage" />
+
 </android.support.constraint.ConstraintLayout>

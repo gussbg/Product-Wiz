@@ -6,6 +6,7 @@ package gussproductions.productwiz;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,6 +59,7 @@ class EbayProductInfo extends ProductInfo
                 itemID     = unparsedProduct.getElementsByTag("itemId").text();
                 price      = new BigDecimal(unparsedProduct.getElementsByTag("currentPrice")
                                                            .text().replaceAll(",", ""));
+                price      = price.setScale(2, RoundingMode.DOWN);
                 title      = unparsedProduct.getElementsByTag("title").text();
                 productURL = unparsedProduct.getElementsByTag("viewItemURL").text();
                 imageURL   = unparsedProduct.getElementsByTag("pictureURLSuperSize").text();
@@ -94,7 +96,7 @@ class EbayProductInfo extends ProductInfo
                 // Not all eBay products have descriptions so this case is handled here.
                 if (unparsedItemDescription != null)
                 {
-                    description = unparsedItemDescription.text().replaceAll("\\<.*?\\>", "");
+                    description = unparsedItemDescription.text().replaceAll("<.*?>", "");
                 }
             }
             catch (IOException ioe)
@@ -117,13 +119,21 @@ class EbayProductInfo extends ProductInfo
                 Document reviewResultPage = Jsoup.connect(productURL).userAgent("Mozilla")
                                                  .ignoreHttpErrors(true).ignoreContentType(true).get();
 
+                Integer  numStars[]           = new Integer[5];
+
+                for (int i = 0; i < 5; i++)
+                {
+                    numStars[i] = 0;
+                }
+
                 // Determines if there are review statistics to parse.
                 if (reviewResultPage.getElementsByClass("ebay-review-list").first() != null)
                 {
                     Elements unparsedRatingCounts = reviewResultPage.getElementsByClass("ebay-review-list")
                                                                     .first()
                                                                     .getElementsByClass("ebay-review-item-r");
-                    Integer  numStars[]           = new Integer[5];
+
+
 
                     // Parses the rating counts for each rating.
                     for (int i = unparsedRatingCounts.size() - 1; i >= 0; i--)
@@ -153,6 +163,10 @@ class EbayProductInfo extends ProductInfo
 
 
                     }
+                }
+                else
+                {
+                    reviewStats = new ReviewStats(numStars);
                 }
             }
             catch (IOException ioe)
@@ -202,7 +216,7 @@ class EbayProductInfo extends ProductInfo
                 }
 
                 // Each parsed review datum is added to a new review and added to the product's reviews.
-                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful));
+                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful, Retailer.EBAY));
             }
         }
         else if (hasReviews)
@@ -236,7 +250,7 @@ class EbayProductInfo extends ProductInfo
                 }
 
                 // Each parsed review datum is added to a new review and added to the product's reviews.
-                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful));
+                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful, Retailer.EBAY));
             }
         }
 
@@ -288,8 +302,6 @@ class EbayProductInfo extends ProductInfo
 
             if (curReviewPageNum == 1)
             {
-                System.out.println("entered");
-
                 try
                 {
                     Document productPage       = Jsoup.connect(productURL).userAgent("Mozilla")

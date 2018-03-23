@@ -23,7 +23,8 @@ import java.util.Collections;
 class Product implements Serializable
 {
     private String             upc;
-    private SerializableBitmap image;
+    private Bitmap             largeImage;
+    private SerializableBitmap smallImage;
     private Retailer           lowestPriceRetailer;
     private BigDecimal         lowestPrice;
     private String             lowestPriceProductURL;
@@ -32,10 +33,13 @@ class Product implements Serializable
     private BestbuyProductInfo bestbuyProductInfo;
     private EbayProductInfo    ebayProductInfo;
     private BookmarkedProduct  bookmarkedProduct;
+    private ReviewStats        reviewStats;
+    private String             description;
     private int                amazonReviewsDelivered;
     private int                ebayReviewsDelivered;
     private int                walmartReviewsDelivered;
     private boolean            hasMoreReviews;
+    private boolean            basicReviewStats;
 
     Product(AmazonProductInfo amazonProductInfo, String upc)
     {
@@ -55,19 +59,10 @@ class Product implements Serializable
         this.ebayProductInfo    = new EbayProductInfo(upc);
     }
 
-    Product(String upc, BookmarkedProduct bookmarkedProduct)
-    {
-        this.upc                = upc;
-        this.bookmarkedProduct  = bookmarkedProduct;
-        this.amazonProductInfo  = new AmazonProductInfo(upc);
-        this.walmartProductInfo = new WalmartProductInfo(upc);
-        this.bestbuyProductInfo = new BestbuyProductInfo(upc);
-        this.ebayProductInfo    = new EbayProductInfo(upc);
-    }
-
     // Getter methods.
     String             getUPC()                   { return upc;                   }
-    Bitmap             getImage()                 { return image.bitmap;          }
+    Bitmap             getLargeImage()            { return largeImage;            }
+    SerializableBitmap getSmallImage()            { return smallImage;            }
     BigDecimal         getLowestPrice()           { return lowestPrice;           }
     Retailer           getLowestPriceRetailer()   { return lowestPriceRetailer;   }
     String             getLowestPriceProductURL() { return lowestPriceProductURL; }
@@ -75,26 +70,70 @@ class Product implements Serializable
     WalmartProductInfo getWalmartProductInfo()    { return walmartProductInfo;    }
     BestbuyProductInfo getBestbuyProductInfo()    { return bestbuyProductInfo;    }
     EbayProductInfo    getEbayProductInfo()       { return ebayProductInfo;       }
-    BookmarkedProduct  getBookmarkedProduct()     { return bookmarkedProduct;     }
+    ReviewStats        getReviewStats()           { return reviewStats;           }
+    String             getDescription()           { return description;           }
     boolean            hasMoreReviews()           { return hasMoreReviews;        }
+    boolean            hasBasicReviewStats()      { return basicReviewStats;      }
 
-    void setImage()
+    void setLargeImage()
     {
+        int largestHeight = 0;
+        Bitmap largestImage = null;
+
         if (amazonProductInfo.hasInfo() && amazonProductInfo.imageURL != null && !amazonProductInfo.imageURL.equals(""))
         {
-            image = new SerializableBitmap(loadImage(amazonProductInfo.imageURL));
+            largeImage = loadImage(amazonProductInfo.imageURL);
+
+            if (largeImage != null)
+            {
+                largestImage = largeImage;
+                largestHeight = largeImage.getHeight();
+            }
         }
-        else if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.imageURL != null && !bestbuyProductInfo.imageURL.equals(""))
+        if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.imageURL != null && !bestbuyProductInfo.imageURL.equals(""))
         {
-            image = new SerializableBitmap(loadImage(bestbuyProductInfo.imageURL));
+            largeImage = loadImage(bestbuyProductInfo.imageURL);
+
+            if (largeImage != null && largestHeight < largeImage.getHeight())
+            {
+                largestImage = largeImage;
+                largestHeight = largeImage.getHeight();
+            }
         }
-        else if (walmartProductInfo.hasInfo() && walmartProductInfo.imageURL != null && !walmartProductInfo.imageURL.equals(""))
+        if (walmartProductInfo.hasInfo() && walmartProductInfo.imageURL != null && !walmartProductInfo.imageURL.equals(""))
         {
-            image = new SerializableBitmap(loadImage(walmartProductInfo.imageURL));
+            largeImage = loadImage(walmartProductInfo.imageURL);
+
+            if (largeImage != null && largestHeight < largeImage.getHeight())
+            {
+                largestImage = largeImage;
+                largestHeight = largeImage.getHeight();
+            }
         }
-        else if (ebayProductInfo.hasInfo() && ebayProductInfo.imageURL != null && !ebayProductInfo.imageURL.equals(""))
+        if (ebayProductInfo.hasInfo() && ebayProductInfo.imageURL != null && !ebayProductInfo.imageURL.equals(""))
         {
-            image = new SerializableBitmap(loadImage(ebayProductInfo.imageURL));
+            largeImage = loadImage(ebayProductInfo.imageURL);
+
+            if (largeImage != null && largestHeight < largeImage.getHeight())
+            {
+                largestImage = largeImage;
+            }
+        }
+
+        largeImage = largestImage;
+    }
+
+    void setSmallImage()
+    {
+        if (!amazonProductInfo.hasInfo() || amazonProductInfo.smallImageURL == null || amazonProductInfo.smallImageURL.equals(""))
+        {
+            setLargeImage();
+            smallImage = new SerializableBitmap(largeImage);
+            largeImage = null;
+        }
+        else
+        {
+            smallImage = new SerializableBitmap(loadImage(amazonProductInfo.smallImageURL));
         }
     }
 
@@ -133,13 +172,13 @@ class Product implements Serializable
             lowestPriceRetailer   = Retailer.BEST_BUY;
             lowestPriceProductURL = bestbuyProductInfo.getProductURL();
         }
-        else if (walmartProductInfo.hasInfo() && lowestPrice.compareTo(walmartProductInfo.getPrice()) == 1)
+        if (walmartProductInfo.hasInfo() && lowestPrice.compareTo(walmartProductInfo.getPrice()) == 1)
         {
             lowestPrice           = walmartProductInfo.getPrice();
             lowestPriceRetailer   = Retailer.WALMART;
             lowestPriceProductURL = walmartProductInfo.getProductURL();
         }
-        else if (ebayProductInfo.hasInfo() && lowestPrice.compareTo(ebayProductInfo.getPrice()) == 1)
+        if (ebayProductInfo.hasInfo() && lowestPrice.compareTo(ebayProductInfo.getPrice()) == 1)
         {
             lowestPrice           = ebayProductInfo.getPrice();
             lowestPriceRetailer   = Retailer.EBAY;
@@ -149,28 +188,60 @@ class Product implements Serializable
 
     void setReviewStats()
     {
-        if (amazonProductInfo.hasInfo())
+        Integer numStars[] = new Integer[5];
+
+        for (int i = 0; i < 5; i++)
+        {
+            numStars[i] = 0;
+        }
+
+        reviewStats = new ReviewStats(numStars);
+
+        if (amazonProductInfo.hasInfo() && reviewStats != null)
         {
             amazonProductInfo.setReviewStats();
+            reviewStats.add(amazonProductInfo.getReviewStats());
         }
 
         if (ebayProductInfo.hasInfo())
         {
             ebayProductInfo.setReviewStats();
+            reviewStats.add(ebayProductInfo.getReviewStats());
         }
 
         if (walmartProductInfo.hasInfo())
         {
             walmartProductInfo.setReviewStats();
+            reviewStats.add(walmartProductInfo.reviewStats);
         }
+
+        if (!amazonProductInfo.hasInfo() && !ebayProductInfo.hasInfo() && !walmartProductInfo.hasInfo() && bestbuyProductInfo.hasInfo())
+        {
+            reviewStats      = bestbuyProductInfo.getReviewStats();
+            basicReviewStats = true;
+        }
+
     }
 
-    void setEbayDescription()
+    void setDescription()
     {
-        if (!amazonProductInfo.hasInfo() && !bestbuyProductInfo.hasInfo()
-            && !walmartProductInfo.hasInfo() && ebayProductInfo.hasInfo())
+        if (amazonProductInfo.hasInfo() && amazonProductInfo.getDescription() != null && !amazonProductInfo.getDescription().equals(""))
+        {
+            description = amazonProductInfo.getDescription();
+        }
+        else if (walmartProductInfo.hasInfo() && walmartProductInfo.getDescription() != null && !walmartProductInfo.getDescription().equals(""))
+        {
+            description = walmartProductInfo.getDescription();
+        }
+        else if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.getDescription() != null && !bestbuyProductInfo.getDescription().equals(""))
+        {
+            description = bestbuyProductInfo.getDescription();
+        }
+        else if (ebayProductInfo.hasInfo())
         {
             ebayProductInfo.setDescription();
+
+            description = ebayProductInfo.getDescription();
         }
     }
 

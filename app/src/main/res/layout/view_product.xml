@@ -4,17 +4,193 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/viewProductLayout">
+
+    <TextView
+        android:id="@+id/productPriceDifference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"/>
+
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/ebayBuyButton"
+        style="@style/ImageButtonPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/buy_button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/bestbuyButton"
+        style="@style/ImageButtonPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/buy_button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/walmartBuyButton"
+        style="@style/ImageButtonPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/buy_button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/ebayLogo"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/ebay_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/ebayBuyButton"
+        app:layout_constraintStart_toEndOf="@+id/ebayPrice"
+        app:layout_constraintTop_toTopOf="@+id/ebayBuyButton" />
+
+    <ImageView
+        android:id="@+id/bestbuyLogo"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/bestbuy_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/bestbuyButton"
+        app:layout_constraintStart_toEndOf="@+id/bestbuyPrice"
+        app:layout_constraintTop_toTopOf="@+id/bestbuyButton" />
+
+    <ImageView
+        android:id="@+id/walmartLogo"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/walmart_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/walmartBuyButton"
+        app:layout_constraintStart_toEndOf="@+id/walmartPrice"
+        app:layout_constraintTop_toTopOf="@+id/walmartBuyButton" />
+
+    <TextView
+        android:id="@+id/oneStarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="1 Star"
+        android:textColor="@color/textColor"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/oneStarBar"
+        app:layout_constraintTop_toTopOf="@+id/oneStarBar" />
+
+    <TextView
+        android:id="@+id/twoStarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="2 Star"
+        android:textColor="@color/textColor"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/twoStarBar"
+        app:layout_constraintTop_toTopOf="@+id/twoStarBar" />
+
+    <TextView
+        android:id="@+id/threeStarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="3 Star"
+        android:textColor="@color/textColor"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/threeStarBar"
+        app:layout_constraintTop_toTopOf="@+id/threeStarBar" />
+
+    <TextView
+        android:id="@+id/fourStarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="4 Star"
+        android:textColor="@color/textColor"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/fourStarBar"
+        app:layout_constraintTop_toTopOf="@+id/fourStarBar" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/oneStarBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/twoStarBar" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/twoStarBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/threeStarBar" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/threeStarBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fourStarBar" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/fourStarBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fiveStarBar" />
 
     <ImageView
         android:id="@+id/imageViewProduct"
-        android:layout_width="200dp"
+        android:layout_width="318dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1.0"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:scaleType="fitCenter"
         android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/productTitle" />
 
     <TextView
         android:id="@+id/productTitle"
@@ -22,21 +198,216 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
         android:ellipsize="end"
         android:maxLines="3"
         android:singleLine="false"
-        android:textSize="18sp"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageViewProduct"
-        app:layout_constraintTop_toTopOf="@+id/imageViewProduct" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/loadReviews"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        style="@style/ImageButtonPrimary"
         android:text="Load Reviews"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewProduct"
-        tools:layout_editor_absoluteX="144dp" />
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/oneStarBar" />
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/fiveStarBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productDescription" />
+
+    <TextView
+        android:id="@+id/fiveStarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="5 Star"
+        android:textColor="@color/textColor"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/fiveStarBar"
+        app:layout_constraintTop_toTopOf="@+id/fiveStarBar" />
+
+    <TextView
+        android:id="@+id/averageRating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/textColor"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productDescription" />
+
+    <android.support.v7.widget.AppCompatRatingBar
+        android:id="@+id/averageRatingBar"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:numStars="5"
+        android:stepSize=".1"
+        android:transformPivotX="0dp"
+        android:transformPivotY="0dp"
+
+        app:layout_constraintStart_toStartOf="@+id/averageRating"
+        app:layout_constraintTop_toBottomOf="@+id/averageRating" />
+
+    <TextView
+        android:id="@+id/productDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="10"
+        android:singleLine="false"
+        android:textColor="@color/textColor"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productAddBookmark" />
+
+    <TextView
+        android:id="@+id/numReviews"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/textColor"
+        app:layout_constraintEnd_toStartOf="@+id/twoStarText"
+        app:layout_constraintStart_toStartOf="@+id/averageRatingBar"
+        app:layout_constraintTop_toBottomOf="@+id/averageRatingBar" />
+
+    <ImageView
+        android:id="@+id/amazonLogo"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/amazon_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/amazonBuyButton"
+        app:layout_constraintStart_toEndOf="@+id/amazonPrice"
+        app:layout_constraintTop_toTopOf="@+id/amazonBuyButton"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/amazonPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/amazonLogo"
+        app:layout_constraintStart_toEndOf="@+id/amazonBuyButton"
+        app:layout_constraintTop_toTopOf="@+id/amazonLogo" />
+
+    <TextView
+        android:id="@+id/walmartPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/walmartLogo"
+        app:layout_constraintStart_toEndOf="@+id/walmartBuyButton"
+        app:layout_constraintTop_toTopOf="@+id/walmartLogo" />
+
+    <TextView
+        android:id="@+id/bestbuyPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/bestbuyLogo"
+        app:layout_constraintStart_toEndOf="@+id/bestbuyButton"
+        app:layout_constraintTop_toTopOf="@+id/bestbuyLogo" />
+
+    <TextView
+        android:id="@+id/ebayPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/ebayLogo"
+        app:layout_constraintStart_toEndOf="@+id/ebayBuyButton"
+        app:layout_constraintTop_toTopOf="@+id/ebayLogo" />
+
+    <TextView
+        android:id="@+id/productPriceDiff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/productBookmarkAdded"
+        app:layout_constraintStart_toEndOf="@+id/productBookmarkAdded"
+        app:layout_constraintTop_toTopOf="@+id/productBookmarkAdded" />
+
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/amazonBuyButton"
+        style="@style/ImageButtonPrimary"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/buy_button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/productBookmarkAdded"
+        style="@style/ImageButtonGreen"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:enabled="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/remove_bookmark"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/productAddBookmark"
+        style="@style/ImageButtonPrimaryDark"
+        android:layout_width="80dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:adjustViewBounds="false"
+        android:scaleType="fitCenter"
+        android:src="@drawable/add_bookmark"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+
 
 </android.support.constraint.ConstraintLayout>

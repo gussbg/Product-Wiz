@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 
@@ -31,6 +32,7 @@ class AmazonProductSearch
     private String              responseURL;
     private int                 totalProductsScanned;
     private boolean             hasProducts;
+    private WeakReference<MainActivity> mainActivity;
 
     final static int            PRODUCTS_PER_PAGE = 10;
 
@@ -61,6 +63,12 @@ class AmazonProductSearch
         {
             hasProducts = false;
         }
+    }
+
+    AmazonProductSearch(String searchText, WeakReference<MainActivity> mainActivity)
+    {
+        this(searchText);
+        this.mainActivity = mainActivity;
     }
 
     /**
@@ -109,6 +117,7 @@ class AmazonProductSearch
                                 Product product         = new Product(new AmazonProductInfo(unparsedProduct), upc);
 
                                 productSet.add(product);
+                                mainActivity.get().mainProgressBar.incrementProgressBy(5);
                                 productsParsed++;
                             }
                         }

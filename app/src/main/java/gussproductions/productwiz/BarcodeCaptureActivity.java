@@ -103,7 +103,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        Snackbar snackbar = Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
+        Snackbar snackbar = Snackbar.make(mGraphicOverlay, getResources().getString(R.string.barcode_message),
                 Snackbar.LENGTH_LONG);
 
         snackbar.getView().setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));

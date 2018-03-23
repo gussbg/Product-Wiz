@@ -1,25 +1,34 @@
 package gussproductions.productwiz;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Timer;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -41,6 +50,11 @@ public class MainActivity extends AppCompatActivity
     private final int PRODUCT_LOADER_ID = 1;
     private final int AMAZON_SEARCH_LOADER_ID = 2;
 
+    WeakReference<MainActivity> mainActivity;
+
+    long currentScrollTime;
+    long lastScrollTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -49,10 +63,11 @@ public class MainActivity extends AppCompatActivity
         handleIntent(getIntent());
 
         context            = getApplicationContext();
+        listView           = findViewById(R.id.listView);
+        mainActivity       = new WeakReference<>(this);
         productListAdapter = new ProductListAdapter(context);
         btnLoadMore        = new Button(context);
         progressBar        = new ProgressBar(context);
-        listView           = findViewById(R.id.listView);
         mainProgressBar    = findViewById(R.id.mainProgressBar);
         noProductsMessage  = findViewById(R.id.noProducts);
 
@@ -83,9 +98,18 @@ public class MainActivity extends AppCompatActivity
 
             mainProgressBar.setVisibility(View.VISIBLE);
 
+            listView.setAdapter(productListAdapter);
+            listView.setVisibility(View.GONE);
+
+            listView.setOnItemClickListener(onItemClickListener);
+            listView.setOnScrollListener(onScrollListener);
+
+
             /**
              * Listening to Load More button click event
              **/
+
+
             btnLoadMore.setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -97,31 +121,6 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
-            listView.setAdapter(productListAdapter);
-            listView.setVisibility(View.GONE);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
-            {
-                Intent intent = new Intent(context, ViewProductActivity.class);
-
-                intent.putExtra(getResources().getString(R.string.calling_activity), getResources().getString(R.string.main_activity_class));
-
-                Product product = (Product) arg0.getItemAtPosition(position);
-
-                System.out.println(product.getUPC());
-
-
-
-                intent.putExtra(getResources().getString(R.string.product_data), product);
-
-                context.startActivity(intent);
-            }
-        });
-
-
 
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
@@ -131,9 +130,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed()
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        searchView.clearFocus();
+        if (requestCode == 4 || requestCode == 0)
+        {
+            productListAdapter.notifyDataSetChanged();
+            searchView.clearFocus();
+        }
     }
 
     @Override
@@ -146,7 +149,8 @@ public class MainActivity extends AppCompatActivity
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_search, menu);
 
-        final MenuItem searchItem = menu.findItem(R.id.viewBookmarks);
+        final MenuItem viewBookmarkButton = menu.findItem(R.id.viewBookmarks);
+        final MenuItem scanBarcodeButton = menu.findItem(R.id.barcodeScan);
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -161,7 +165,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                searchItem.setVisible(false);
+                viewBookmarkButton.setVisible(false);
+                scanBarcodeButton.setVisible(false);
             }
         });
         // Detect SearchView close
@@ -170,7 +175,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onClose()
             {
-                searchItem.setVisible(true);
+                viewBookmarkButton.setVisible(true);
+                scanBarcodeButton.setVisible(true);
+
+                listView.invalidateViews();
                 return false;
             }
         });
@@ -213,7 +221,9 @@ public class MainActivity extends AppCompatActivity
         {
             Intent viewBookmarks = new Intent(this, ViewBookmarksActivity.class);
 
-            this.startActivity(viewBookmarks);
+            //this.startActivity(viewBookmarks);
+
+            startActivityForResult(viewBookmarks, 4);
         }
 
         return true;
@@ -223,7 +233,7 @@ public class MainActivity extends AppCompatActivity
     {
         @Override public Loader<ArrayList<Product>> onCreateLoader(int id, Bundle args)
         {
-            productListLoader = new ProductListLoader(context, amazonProductSearch);
+            productListLoader = new ProductListLoader(context, amazonProductSearch, mainActivity);
 
             // This is called when a new Loader needs to be created.  This
             // sample only has one Loader with no arguments, so it is simple.
@@ -238,6 +248,8 @@ public class MainActivity extends AppCompatActivity
             productListAdapter.notifyDataSetChanged();
 
             mainProgressBar.setVisibility(View.GONE);
+            mainProgressBar.setProgress(0);
+
             listView.removeFooterView(progressBar);
 
             if (products.size() == 0)
@@ -270,7 +282,7 @@ public class MainActivity extends AppCompatActivity
     {
         @Override public Loader<AmazonProductSearch> onCreateLoader(int id, Bundle args)
         {
-            amazonSearchLoader = new AmazonSearchLoader(context, query);
+            amazonSearchLoader = new AmazonSearchLoader(context, query, mainActivity);
 
             // This is called when a new Loader needs to be created.  This
             // sample only has one Loader with no arguments, so it is simple.
@@ -285,4 +297,35 @@ public class MainActivity extends AppCompatActivity
 
         @Override public void onLoaderReset(Loader<AmazonProductSearch> amazonSearchLoader) {}
     };
+
+    private AbsListView.OnScrollListener onScrollListener = new AbsListView.OnScrollListener()
+    {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState)
+        {
+            productListAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem,
+                             int visibleItemCount, int totalItemCount) {}
+    };
+
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener()
+    {
+        @Override
+        public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
+        {
+            Intent intent = new Intent(context, ViewProductActivity.class);
+
+            intent.putExtra(getResources().getString(R.string.calling_activity), getResources().getString(R.string.main_activity_class));
+
+            Product product = (Product) arg0.getItemAtPosition(position);
+
+            intent.putExtra(getResources().getString(R.string.product_data), product);
+
+            startActivityForResult(intent, 0);
+        }
+    };
+
 }

@@ -7,6 +7,7 @@ package gussproductions.productwiz;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 /*
@@ -36,8 +37,18 @@ class BestbuyProductInfo extends ProductInfo
         {
             Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla").followRedirects(true).referrer("http://www.google.com")
                     .ignoreHttpErrors(true).ignoreContentType(true).timeout(0).get();
-            int      numResults        = Integer.parseInt(productResultPage.getElementsByTag("products")
-                                                                           .attr("total"));
+            String unparsedNumResults = productResultPage.getElementsByTag("products").attr("total");
+
+            Integer numResults;
+
+            if (unparsedNumResults == null || unparsedNumResults.equals(""))
+            {
+                numResults = 0;
+            }
+            else
+            {
+                numResults = Integer.parseInt(unparsedNumResults);
+            }
 
             // Ensures that only one product is parsed, it is not expected to have more than one result however.
             if (numResults == 1)
@@ -52,12 +63,12 @@ class BestbuyProductInfo extends ProductInfo
 
                 price             = new BigDecimal(unparsedProduct.getElementsByTag("salePrice")
                                                                   .text().replaceAll(",", ""));
-                System.out.println("Price:                      " + price.toString());
+                price             = price.setScale(2, RoundingMode.DOWN);
                 itemID            = unparsedProduct.getElementsByTag("sku").text();
                 productURL        = unparsedProduct.getElementsByTag("url").text();
                 title             = unparsedProduct.getElementsByTag("name").text();
                 imageURL          = unparsedProduct.getElementsByTag("image").text();
-                description       = unparsedProduct.getElementsByTag("longDescription").text();
+                description       = unparsedProduct.getElementsByTag("longDescription").text().replaceAll("<.*?>", "");
 
                 if (!unparsedNumReviews.equals("") && !unparsedAverageRating.equals(""))
                 {

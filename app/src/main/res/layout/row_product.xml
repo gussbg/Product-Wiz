@@ -7,14 +7,14 @@
     android:descendantFocusability="blocksDescendants">
 
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/bookmarkAdded"
-        style="@style/Widget.AppCompat.ImageButton"
+        style="@style/ImageButtonGreen"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:adjustViewBounds="false"
-        android:backgroundTint="@color/colorBookmarkAdded"
         android:enabled="false"
         android:scaleType="fitCenter"
         android:src="@drawable/remove_bookmark"
@@ -22,14 +22,14 @@
         app:layout_constraintStart_toEndOf="@+id/listBuyButton"
         app:layout_constraintTop_toTopOf="@+id/listBuyButton" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/addBookmark"
-        style="@style/Widget.AppCompat.ImageButton"
+        style="@style/ImageButtonPrimaryDark"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:adjustViewBounds="false"
-        android:backgroundTint="@color/colorPrimaryDark"
         android:scaleType="fitCenter"
         android:src="@drawable/add_bookmark"
         app:layout_constraintStart_toEndOf="@+id/listBuyButton"
@@ -39,6 +39,7 @@
         android:id="@+id/productListImage"
         android:layout_width="140dp"
         android:layout_height="140dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:contentDescription="@string/product_image_text"
@@ -52,14 +53,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-
-
         android:layout_marginStart="8dp"
-
-
         android:ellipsize="end"
         android:maxLines="3"
         android:singleLine="false"
+        android:textColor="@color/textColor"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/productListImage"
@@ -69,9 +67,12 @@
         android:id="@+id/productListPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        app:layout_constraintStart_toEndOf="@+id/lowestPriceRetailerImage"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@+id/productListImage"
         app:layout_constraintTop_toBottomOf="@+id/productListTitle" />
 
     <ImageView
@@ -82,21 +83,20 @@
         android:layout_marginTop="8dp"
         android:adjustViewBounds="true"
         app:layout_constraintStart_toEndOf="@+id/productListImage"
-        app:layout_constraintTop_toBottomOf="@+id/productListTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/priceDifference" />
 
-    <ImageButton
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/listBuyButton"
-        style="@style/Widget.AppCompat.ImageButton"
+        style="@style/ImageButtonPrimary"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:adjustViewBounds="false"
-        android:backgroundTint="@color/colorPrimary"
         android:scaleType="fitCenter"
         android:src="@drawable/buy_button"
         app:layout_constraintStart_toEndOf="@+id/productListImage"
-        app:layout_constraintTop_toBottomOf="@+id/productListPrice" />
+        app:layout_constraintTop_toBottomOf="@+id/lowestPriceRetailerImage" />
 
     <ImageView
         android:id="@+id/buttonBuffer"
@@ -107,5 +107,14 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/listBuyButton"
         app:layout_constraintTop_toBottomOf="@+id/listBuyButton" />
+
+    <TextView
+        android:id="@+id/priceDifference"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@+id/productListImage"
+        app:layout_constraintTop_toBottomOf="@+id/productListPrice" />
 
 </android.support.constraint.ConstraintLayout>
