@@ -306,8 +306,6 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:ellipsize="end"
-        android:maxLines="10"
         android:singleLine="false"
         android:textColor="@color/textColor"
         android:textSize="18sp"
