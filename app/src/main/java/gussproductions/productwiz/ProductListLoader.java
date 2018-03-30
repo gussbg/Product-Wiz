@@ -1,29 +1,37 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.productwiz;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.widget.ProgressBar;
-
-import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
 
 /**
- * Created by Brendon on 2/11/2018.
+ * The ProductListLoader is used to load products for use in the MainActivity.
+ * The majority of the work is performed in the loadInBackground method.
+ *
+ * @author Brendon Guss
+ * @since  02/11/2018
  */
-
 class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
 {
-    private ArrayList <Product> productList;
+    private ArrayList<Product>  productList;
     private AmazonProductSearch amazonProductSearch;
+
+    // This is used to update the MainActivity's progress bar.
     private WeakReference<MainActivity> mainActivity;
 
+    /**
+     * Sets the required member variables necessary for the loader.
+     *
+     * @param context The application context.
+     * @param amazonProductSearch The AmazonProductSearch that contains the Amazon product information for every product.
+     * @param mainActivity A weak reference to the MainActivity used to update it's progress bar.
+     */
     ProductListLoader(Context context, AmazonProductSearch amazonProductSearch, WeakReference<MainActivity> mainActivity)
     {
         super(context);
@@ -32,21 +40,27 @@ class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
         this.mainActivity = mainActivity;
     }
 
+    /**
+     * Partially loads a list of products (the data that is needed in each list item). The rest of the
+     * product data such as review statistics is loaded when a product is tapped on via the ProductLoader.
+     *
+     * @return The ArrayList of partially loaded products.
+     */
     @Override public ArrayList<Product> loadInBackground()
     {
-        productList = amazonProductSearch.getMoreProducts(AmazonProductSearch.PRODUCTS_PER_PAGE);
-
         int progressIncrement;
+        final int MAIN_HALF_PROGRESS = 50;
+
+        productList = amazonProductSearch.getMoreProducts(AmazonProductSearch.PRODUCTS_PER_PAGE);
 
         if (productList.size() != 0)
         {
-            progressIncrement = 50 / productList.size();
+            progressIncrement = MAIN_HALF_PROGRESS / productList.size();
         }
         else
         {
-            progressIncrement = 50;
+            progressIncrement = MAIN_HALF_PROGRESS;
         }
-
 
         for (Product product : productList)
         {
@@ -59,7 +73,7 @@ class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
     }
 
     /**
-     * Called when there is new data to deliver to the client.
+     * Called when there is new data to deliver.
      */
     @Override public void deliverResult(ArrayList<Product> productList)
     {
@@ -87,20 +101,28 @@ class ProductListLoader extends AsyncTaskLoader<ArrayList<Product>>
         }
     }
 
+    /**
+     * Handles a request to stop the Loader.
+     */
     @Override public void onStopLoading()
     {
         cancelLoad();
     }
 
+    /**
+     * Handles a request to cancel the loader.
+     */
     @Override public void onCanceled(ArrayList<Product> productList)
     {
         super.onCanceled(productList);
     }
 
+    /**
+     * Handles a request to reset the loader.
+     */
     @Override protected void onReset()
     {
         super.onReset();
-
         onStopLoading();
     }
 }

@@ -9,18 +9,15 @@ import java.net.URL;
 import java.util.ArrayList;
 
 /**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ * Basic unit tests. Most testing is done via manual integration testing using android emulators and physical devices.
  */
-public class ExampleUnitTest
+public class UnitTestSuite
 {
     @Test
     public void test_amazon_search()
     {
         AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dvd");
 
-        //amazonProductSearch.getMoreProducts(10);
         amazonProductSearch.getMoreProducts(10);
 
         ArrayList<Product> products = amazonProductSearch.getMoreProducts(10);
@@ -165,16 +162,12 @@ public class ExampleUnitTest
 
         product.setReviewStats();
 
-
-
         ArrayList<Review> reviews = product.getEbayProductInfo().getMoreReviews();
-
 
         for (Review review : reviews)
         {
             System.out.println(review.getReviewTitle());
         }
-
     }
 
     @Test
@@ -182,7 +175,8 @@ public class ExampleUnitTest
     {
         Product product = new Product("024543327868");
 
-        product.setImage(false);
+        product.setSmallImage();
+        product.setLargeImage();
         product.setLowestPriceInfo();
 
         product.setReviewStats();
@@ -207,6 +201,5 @@ public class ExampleUnitTest
         System.out.println(numFiveStars);
 
         product.setDescription();
-
     }
 }

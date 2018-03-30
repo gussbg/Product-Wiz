@@ -42,6 +42,8 @@ class AmazonProductInfo extends ProductInfo
 
     /**
      * Sets the Amazon product information given a UPC (if the product is listed on Amazon).
+     *
+     * @param upc The product upc.
      */
     AmazonProductInfo(String upc)
     {
@@ -102,10 +104,7 @@ class AmazonProductInfo extends ProductInfo
         description = unparsedProduct.getElementsByTag("EditorialReview").select("Content").text().replaceAll("<.*?>", "");
         productURL  = unparsedProduct.getElementsByTag("DetailPageURL").text();
 
-        // Not all Amazon products have images, so the lack of an image is handled here.
-
-
-
+        // Sets the largest image that is used when viewing a product in more detail.
         if (unparsedProduct.getElementsByTag("HiResImage").size() == 2 && unparsedProduct.getElementsByTag("HiResImage").get(1) != null)
         {
             imageURL = unparsedProduct.getElementsByTag("HiResImage").get(1).select("URL").text();
@@ -123,6 +122,7 @@ class AmazonProductInfo extends ProductInfo
             imageURL = null;
         }
 
+        // This small image is used for viewing products in a list.
         if (unparsedProduct.getElementsByTag("LargeImage").first() != null && !unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text().equals(""))
         {
             smallImageURL = unparsedProduct.getElementsByTag("LargeImage").first().select("URL").text();
@@ -131,7 +131,6 @@ class AmazonProductInfo extends ProductInfo
         {
             smallImageURL = null;
         }
-
 
         hasInfo = true;
     }
@@ -153,6 +152,7 @@ class AmazonProductInfo extends ProductInfo
         totalNumReviews = 0;
         numStars        = new Integer[5];
 
+        // Initialize each star count to 0 to avoid errors.
         for (int i = 0; i < 5; i++)
         {
             numStars[i] = 0;
@@ -238,6 +238,8 @@ class AmazonProductInfo extends ProductInfo
 
     /**
      * Parses all of the reviews on the next review page of an Amazon product.
+     *
+     * @return The parsed reviews.
      */
     ArrayList<Review> getMoreReviews()
     {
@@ -246,11 +248,10 @@ class AmazonProductInfo extends ProductInfo
         // If there are no reviews to parse, this method does nothing and no reviews are set.
         if (curReviewURL != null && hasInfo)
         {
-
             try
             {
                 Document   reviewPage       = Jsoup.connect(curReviewURL).ignoreHttpErrors(true)
-                                                .ignoreContentType(true).get();
+                                                   .ignoreContentType(true).get();
                 Elements   unparsedPageNums = reviewPage.getElementsByClass("page-button");
                 Elements   unparsedReviews  = reviewPage.getElementsByClass("a-section celwidget");
                 DateFormat dateFormat       = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
@@ -265,17 +266,17 @@ class AmazonProductInfo extends ProductInfo
                             .getElementsByClass("a-size-base a-link-normal review-title a-color-base a-text-bold")
                             .first().text();
                     StarRating starRating  = StarRating.valueOf(Integer.parseInt(unparsedReview
-                            .getElementsByClass("a-row").first()
-                            .getElementsByClass("a-link-normal").first()
-                            .attr("title").substring(0, 1)));
+                                                       .getElementsByClass("a-row").first()
+                                                       .getElementsByClass("a-link-normal").first()
+                                                       .attr("title").substring(0, 1)));
                     String     reviewText  = unparsedReview.getElementsByClass("a-size-base review-text")
                                                            .first().text().replaceAll("<.*?>", "");
 
                     try
                     {
                         reviewDate = dateFormat.parse(unparsedReview
-                                     .getElementsByClass("a-size-base a-color-secondary review-date")
-                                     .first().text().substring(3));
+                                               .getElementsByClass("a-size-base a-color-secondary review-date")
+                                               .first().text().substring(3));
                     }
                     catch (ParseException pe)
                     {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.productwiz;
 
 import android.content.AsyncTaskLoader;
@@ -13,29 +17,54 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
- * Created by Brendon on 3/14/2018.
+ * The BookmarkListLoader is used to load bookmarked products for use in the ViewBookmarksActivity.
+ * The majority of the work is performed in the loadInBackground method.
+ *
+ * @author Brendon Guss
+ * @since  03/14/2018
  */
-
-public class BookmarkListLoader extends AsyncTaskLoader<ArrayList<BookmarkedProduct>>
+class BookmarkListLoader extends AsyncTaskLoader<ArrayList<BookmarkedProduct>>
 {
     private ArrayList <BookmarkedProduct> bookmarkList;
-    private final SharedPreferences sharedPref;
+
+    // This is used to update the ViewBookmarksActivity's progress bar.
     private WeakReference<ViewBookmarksActivity> viewBookmarksActivity;
 
-    BookmarkListLoader(Context context, SharedPreferences sharedPref, WeakReference<ViewBookmarksActivity> viewBookmarksActivity)
+    private final SharedPreferences sharedPref;
+
+    /**
+     * Sets the required member variables necessary for the loader.
+     *
+     * @param context The application context.
+     * @param sharedPref The shared preferences are used to load the bookmarks from the device.
+     * @param viewBookmarksActivity A weak reference to the ViewBookmarksActivity used to update it's progress bar.
+     */
+    BookmarkListLoader(Context context, SharedPreferences sharedPref,
+                       WeakReference<ViewBookmarksActivity> viewBookmarksActivity)
     {
         super(context);
-        this.sharedPref = sharedPref;
+
+        this.sharedPref            = sharedPref;
         this.viewBookmarksActivity = viewBookmarksActivity;
     }
 
+    /**
+     * Loads the bookmarked product information and latest product information primarily to get the current prices
+     * as they are likely different from when the product was bookmarked.
+     *
+     * @return The loaded ArrayList of bookmarked products.
+     */
     @Override public ArrayList<BookmarkedProduct> loadInBackground()
     {
-        bookmarkList = new ArrayList<>();
-        Map<String, ?> bookmarkedProductsMap = sharedPref.getAll();
+        Map<String, ?> bookmarkedProductsMap;
         int progressIncrement;
 
+        final int MAX_BOOKMARK_PROGRESS = 100;
 
+        bookmarkList          = new ArrayList<>();
+        bookmarkedProductsMap = sharedPref.getAll();
+
+        // Adds bookmarks stored in the shared preferences.
         for (Map.Entry<String, ?> bookmarkedProductEntry : bookmarkedProductsMap.entrySet())
         {
             Gson gson = new Gson();
@@ -45,24 +74,28 @@ public class BookmarkListLoader extends AsyncTaskLoader<ArrayList<BookmarkedProd
             bookmarkList.add(bookmarkedProduct);
         }
 
+        // Loaded bookmarks are sorted in descending order by date added.
         Collections.sort(bookmarkList, new Comparator<BookmarkedProduct>()
         {
             @Override
             public int compare(BookmarkedProduct firstProduct, BookmarkedProduct secondProduct)
             {
-                return firstProduct.getDateAdded().compareTo(secondProduct.getDateAdded());
+                return secondProduct.getDateAdded().compareTo(firstProduct.getDateAdded());
             }
         });
 
+        // Determines how much the bookmark load progress bar should be incremented every time a bookmarked
+        // product is loaded.
         if (bookmarkList.size() != 0)
         {
-            progressIncrement = 100 / bookmarkList.size();
+            progressIncrement = MAX_BOOKMARK_PROGRESS / bookmarkList.size();
         }
         else
         {
-            progressIncrement = 100;
+            progressIncrement = MAX_BOOKMARK_PROGRESS;
         }
 
+        // Product is updated to reflect the latest prices and other information.
         for (BookmarkedProduct bookmarkedProduct : bookmarkList)
         {
             Product product = new Product(bookmarkedProduct.getUPC());
@@ -79,7 +112,7 @@ public class BookmarkListLoader extends AsyncTaskLoader<ArrayList<BookmarkedProd
     }
 
     /**
-     * Called when there is new data to deliver to the client.
+     * Called when there is new data to deliver.
      */
     @Override public void deliverResult(ArrayList<BookmarkedProduct> bookmarkList)
     {
@@ -107,20 +140,28 @@ public class BookmarkListLoader extends AsyncTaskLoader<ArrayList<BookmarkedProd
         }
     }
 
+    /**
+     * Handles a request to stop the Loader.
+     */
     @Override public void onStopLoading()
     {
         cancelLoad();
     }
 
+    /**
+     * Handles a request to cancel the loader.
+     */
     @Override public void onCanceled(ArrayList<BookmarkedProduct> bookmarkList)
     {
         super.onCanceled(bookmarkList);
     }
 
+    /**
+     * Handles a request to reset the loader.
+     */
     @Override protected void onReset()
     {
         super.onReset();
-
         onStopLoading();
     }
 }

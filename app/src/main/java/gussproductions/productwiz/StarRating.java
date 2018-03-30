@@ -41,10 +41,7 @@ enum StarRating
      * @param starRating The Integer to be converted to StarRating.
      * @return The StarRating value.
      */
-    static StarRating valueOf(Integer starRating)
-    {
-        return valueMap.get(starRating);
-    }
+    static StarRating valueOf(Integer starRating) { return valueMap.get(starRating); }
 
     Integer getValue() { return value; }
 }

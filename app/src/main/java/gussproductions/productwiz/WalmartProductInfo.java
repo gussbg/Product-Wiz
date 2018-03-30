@@ -4,7 +4,6 @@
 
 package gussproductions.productwiz;
 
-import android.widget.ProgressBar;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,7 +50,7 @@ class WalmartProductInfo extends ProductInfo
                     title       = unparsedProduct.getElementsByTag("name").text();
                     description = unparsedProduct.getElementsByTag("shortDescription").text().replaceAll("<.*?>", "");
                     productURL  = unparsedProduct.getElementsByTag("productUrl").text();
-                    imageURL    = unparsedProduct.getElementsByTag("largeImage").text();
+                    imageURL    = unparsedProduct.getElementsByTag("largeImage").first().text();
                     hasInfo     = true;
                 }
                 else

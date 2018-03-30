@@ -4,11 +4,8 @@
 
 package gussproductions.productwiz;
 
-import android.graphics.Bitmap;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 
 
 /**

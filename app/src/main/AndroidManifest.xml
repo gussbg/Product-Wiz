@@ -3,19 +3,17 @@
     package="gussproductions.productwiz">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.camera" />
 
-    <uses-permission android:name="android.permission.CAMERA" />
-
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/productwiz_icon"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/productwiz_round_icon"
         android:supportsRtl="true"
-        android:theme="@style/ProductWizTheme"
-        android:largeHeap="true">
+        android:theme="@style/ProductWizTheme">
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
@@ -25,9 +23,9 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEARCH" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -42,7 +40,9 @@
         <activity
             android:name=".ViewProductActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".ViewBookmarksActivity"></activity>
+        <activity
+            android:name=".ViewBookmarksActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

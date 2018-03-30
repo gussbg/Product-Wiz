@@ -36,10 +36,20 @@ class AmazonRequestHelper extends RequestHelper
     // The HTTP request method to fetch the response.
     private static final String REQUEST_METHOD = "GET";
 
-    private Mac mac = null;
+    private Mac mac;
 
     private AmazonRequestMode amazonRequestMode;
 
+    /**
+     * Constructs the AmazonRequestHelper given an Amazon request mode and an Amazon searchID.
+     *
+     * @param searchID The Amazon search ID.
+     * @param amazonRequestMode The Amazon request mode.
+     * @throws IllegalArgumentException If an illegal argument is given.
+     * @throws UnsupportedEncodingException If the character encoding mode is not supported.
+     * @throws NoSuchAlgorithmException If the algorithm does not exist.
+     * @throws InvalidKeyException If the key is invalid.
+     */
     AmazonRequestHelper(String searchID, AmazonRequestMode amazonRequestMode)
             throws IllegalArgumentException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
     {
@@ -50,9 +60,9 @@ class AmazonRequestHelper extends RequestHelper
         this.amazonRequestMode = amazonRequestMode;
         mac                    = Mac.getInstance(HMAC_SHA256_ALGORITHM);
 
-        mac.init(secretKeySpec);
+        mac.init(secretKeySpec); // Initialize MAC.
 
-        setCommonRequestParams();
+        setCommonRequestParams(); // Set the common request parameters.
 
         if (amazonRequestMode.equals(AmazonRequestMode.ITEM_SEARCH)) // For generating a list of items.
         {

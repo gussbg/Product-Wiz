@@ -20,14 +20,19 @@ import org.jsoup.nodes.Element;
 
 
 /**
- * The BestbuyProductInfo class encapsulates BestBuy product information, reviews, and review
- * statistics. The product information is set within the constructor.
+ * The BestbuyProductInfo class encapsulates BestBuy product information and review
+ * statistics.
  *
  * @author Brendon Guss
  * @since  01/09/2018
  */
 class BestbuyProductInfo extends ProductInfo
 {
+    /**
+     * The product information is parsed and set given a product's UPC.
+     *
+     * @param upc A product UPC code.
+     */
     BestbuyProductInfo(String upc)
     {
         BestbuyRequestHelper bestbuyRequestHelper = new BestbuyRequestHelper(upc);
@@ -35,9 +40,9 @@ class BestbuyProductInfo extends ProductInfo
 
         try
         {
-            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla").followRedirects(true).referrer("http://www.google.com")
-                    .ignoreHttpErrors(true).ignoreContentType(true).timeout(0).get();
-            String unparsedNumResults = productResultPage.getElementsByTag("products").attr("total");
+            Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla").followRedirects(true)
+                                              .ignoreHttpErrors(true).ignoreContentType(true).timeout(0).get();
+            String unparsedNumResults  = productResultPage.getElementsByTag("products").attr("total");
 
             Integer numResults;
 
@@ -68,7 +73,8 @@ class BestbuyProductInfo extends ProductInfo
                 productURL        = unparsedProduct.getElementsByTag("url").text();
                 title             = unparsedProduct.getElementsByTag("name").text();
                 imageURL          = unparsedProduct.getElementsByTag("image").text();
-                description       = unparsedProduct.getElementsByTag("longDescription").text().replaceAll("<.*?>", "");
+                description       = unparsedProduct.getElementsByTag("longDescription").text()
+                                                   .replaceAll("<.*?>", ""); // Removes HTML
 
                 if (!unparsedNumReviews.equals("") && !unparsedAverageRating.equals(""))
                 {

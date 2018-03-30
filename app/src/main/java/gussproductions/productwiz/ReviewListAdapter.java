@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.productwiz;
 
 import android.content.Context;
@@ -10,21 +14,28 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
 /**
- * Created by Brendon on 2/22/2018.
+ * The ReviewListAdapter class is an ArrayAdapter of Reviews for a product.
+ * The ViewProductActivity utilizes it as it's source for review data and views.
+ *
+ * @author Brendon Guss
+ * @since  02/22/2018
  */
-
-public class ReviewListAdapter extends ArrayAdapter<Review>
+class ReviewListAdapter extends ArrayAdapter<Review>
 {
     private Context context;
 
+    /**
+     * Sets the context and the list item layout.
+     *
+     * @param context The application context
+     */
     ReviewListAdapter(Context context)
     {
         super(context, android.R.layout.simple_list_item_2);
@@ -32,6 +43,11 @@ public class ReviewListAdapter extends ArrayAdapter<Review>
         this.context = context;
     }
 
+    /**
+     * Adds and sets the review adapter data
+     *
+     * @param reviews The reviews to add to the adapter.
+     */
     public void setData(ArrayList<Review> reviews)
     {
         if (reviews != null)
@@ -40,69 +56,101 @@ public class ReviewListAdapter extends ArrayAdapter<Review>
         }
     }
 
-    @Override public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        View view;
+    /**
+     * Gives the view for each review for within the ViewProduct review ListView and
+     * the sets of views contained within it and the processing necessary to do so.
+     *
+     * @param position The position in the adapter array of reviews for a product.
+     * @param convertView The view that was last returned from this method.
+     * @param parent The parent ViewGroup.
+     * @return The updated view for a particular review within the ListView.
+     */
+    @NonNull @Override public View getView(int position, View convertView, @NonNull ViewGroup parent)
+    {
+        final View   reviewView;
+        final Review review;
 
-        final LayoutInflater mInflater = LayoutInflater.from(context);
+        // Utility Variables
+        final LayoutInflater layoutInflater;
+        final DecimalFormat  numHelpfulFormat;
+        final DateFormat     dateFormat;
 
-        if (convertView == null) {
-            view = mInflater.inflate(R.layout.row_review, parent, false);
-        } else {
-            view = convertView;
-        }
+        // Views
+        final TextView reviewTitle;
+        final TextView reviewDate;
+        final TextView reviewText;
+        final TextView thumbUpText;
+        final TextView thumbDownText;
 
-        final Review review = getItem(position);
+        final RatingBar ratingBar;
+        final ImageView reviewRetailer;
 
-        TextView reviewTitle = view.findViewById(R.id.reviewTitle);
+        layoutInflater = LayoutInflater.from(context);
 
-        RatingBar ratingBar = view.findViewById(R.id.reviewRating);
-
-        TextView reviewDate = view.findViewById(R.id.reviewDate);
-
-        TextView reviewText = view.findViewById(R.id.reviewText);
-
-        ImageView reviewRetailer = view.findViewById(R.id.reviewRetailer);
-
-        if (review.getRetailer() == Retailer.AMAZON)
+        // If the view has not been displayed then it is inflated, otherwise the previous view is used (convertView).
+        if (convertView == null)
         {
-            reviewRetailer.setImageResource(R.drawable.amazon_logo);
+            reviewView = layoutInflater.inflate(R.layout.row_review, parent, false);
         }
-        else if (review.getRetailer() == Retailer.WALMART)
+        else
         {
-            reviewRetailer.setImageResource(R.drawable.walmart_logo);
-        }
-        else if (review.getRetailer() == Retailer.BEST_BUY)
-        {
-            reviewRetailer.setImageResource(R.drawable.bestbuy_logo);
-        }
-        else if (review.getRetailer() == Retailer.EBAY)
-        {
-            reviewRetailer.setImageResource(R.drawable.ebay_logo);
+            reviewView = convertView;
         }
 
-        TextView thumbUpText = view.findViewById(R.id.thumbUpText);
-        TextView thumbDownText = view.findViewById(R.id.thumbDownText);
+        numHelpfulFormat = new DecimalFormat("###,##0");
+        dateFormat       = new SimpleDateFormat("MMMM d, yyyy", Locale.US);
 
-        ratingBar.setIsIndicator(true);
+        review = getItem(position);
 
-        ratingBar.setRating(review.getStarRating().getValue());
+        reviewTitle   = reviewView.findViewById(R.id.reviewTitle);
+        reviewDate    = reviewView.findViewById(R.id.reviewDate);
+        reviewText    = reviewView.findViewById(R.id.reviewText);
+        thumbUpText   = reviewView.findViewById(R.id.thumbUpText);
+        thumbDownText = reviewView.findViewById(R.id.thumbDownText);
+
+        ratingBar      = reviewView.findViewById(R.id.reviewRating);
+        reviewRetailer = reviewView.findViewById(R.id.reviewRetailer);
+
+        if (review.getReviewTitle() == null || review.getReviewTitle().equals(""))
+        {
+            reviewTitle.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            reviewTitle.setVisibility(View.VISIBLE);
+            reviewTitle.setText(review.getReviewText());
+        }
 
         reviewTitle.setText(review.getReviewTitle());
 
-        reviewText.setText(review.getReviewText());
-
-        DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US);
-
-        thumbUpText.setText(review.getNumHelpful().toString());
-        thumbDownText.setText(review.getNumUnhelpful().toString());
-
-        if (review.getDate() != null)
+        if (review.getDate() == null)
         {
+            reviewDate.setVisibility(View.GONE);
+        }
+        else
+        {
+            reviewDate.setVisibility(View.VISIBLE);
             reviewDate.setText(dateFormat.format(review.getDate()));
         }
 
+        if (review.getReviewText() == null || review.getReviewText().equals(""))
+        {
+            reviewText.setVisibility(View.GONE);
+        }
+        else
+        {
+            reviewText.setVisibility(View.VISIBLE);
+            reviewText.setText(review.getReviewText());
+        }
 
-        return view;
+        thumbUpText.setText(numHelpfulFormat.format(review.getNumHelpful()));
+        thumbDownText.setText(numHelpfulFormat.format(review.getNumUnhelpful()));
 
+        ratingBar.setIsIndicator(true);
+        ratingBar.setRating(review.getStarRating().getValue());
+
+        ProductListAdapter.setRetailerLogo(review.getRetailer(), reviewRetailer);
+
+        return reviewView;
     }
 }

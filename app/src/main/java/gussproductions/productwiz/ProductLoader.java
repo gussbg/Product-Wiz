@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018, Brendon Guss. All rights reserved.
+ */
+
 package gussproductions.productwiz;
 
 import android.content.AsyncTaskLoader;
@@ -7,9 +11,12 @@ import android.widget.ProgressBar;
 import java.lang.ref.WeakReference;
 
 /**
- * Created by Brendon on 2/20/2018.
+ * The ProductLoader is used to load a product that may or may not already be partially loaded for use
+ * in the ViewProductActivity. The majority of the work is performed in the loadInBackground method.
+ *
+ * @author Brendon Guss
+ * @since  02/20/2018
  */
-
 class ProductLoader extends AsyncTaskLoader<Product>
 {
     private Product product;
@@ -17,33 +24,56 @@ class ProductLoader extends AsyncTaskLoader<Product>
     private String  upc;
     private WeakReference<ViewProductActivity> viewProductActivity;
 
+    /**
+     * Sets the required member variables necessary for the loader. This constructor is used when the product
+     * is already partially loaded.
+     *
+     * @param context The application context.
+     * @param viewProductActivity A weak reference to the ViewProductActivity used to update it's progress bar.
+     */
     ProductLoader(Context context, Product product, WeakReference<ViewProductActivity> viewProductActivity)
     {
         super(context);
 
-        this.product = product;
+        this.product             = product;
         this.viewProductActivity = viewProductActivity;
-        productLoaded = true;
-
+        this.productLoaded       = true;
     }
 
+    /**
+     * Sets the required member variables necessary for the loader. This constructor is used when the product
+     * is not already partially loaded.
+     *
+     * @param context The application context.
+     * @param upc The product's upc.
+     * @param viewProductActivity A weak reference to the ViewProductActivity used to update it's progress bar.
+     */
     ProductLoader(Context context, String upc, WeakReference<ViewProductActivity> viewProductActivity)
     {
         super(context);
-        productLoaded = false;
+
         this.upc = upc;
         this.viewProductActivity = viewProductActivity;
+        this.productLoaded = false;
     }
 
+    /**
+     * Loads the product's numerous attributes based on if it has already been partially loaded or not.
+     * Updates the ViewProductActivity's progress bar based on how much of the product has been loaded.
+     *
+     * @return The fully loaded product.
+     */
     @Override public Product loadInBackground()
     {
         ProgressBar mainProgressBar;
 
+        mainProgressBar = viewProductActivity.get().mainProgressBar;
+
+        final int MAX_PRODUCT_PROGRESS = 100;
+
         if (!productLoaded)
         {
-            mainProgressBar = viewProductActivity.get().mainProgressBar;
-
-            mainProgressBar.setMax(100);
+            mainProgressBar.setMax(MAX_PRODUCT_PROGRESS);
             product = new Product(upc);
             mainProgressBar.setProgress(30);
 
@@ -51,26 +81,38 @@ class ProductLoader extends AsyncTaskLoader<Product>
 
             product.setLargeImage();
             mainProgressBar.setProgress(70);
+
             product.setReviewStats();
             mainProgressBar.setProgress(90);
+
             product.setDescription();
+            mainProgressBar.setProgress(MAX_PRODUCT_PROGRESS);
         }
         else
         {
-            viewProductActivity.get().mainProgressBar.setProgress(25);
+            mainProgressBar.setProgress(25);
+
             product.setLargeImage();
-            viewProductActivity.get().mainProgressBar.setProgress(75);
+
+            if (product.getLargeImage() == null)
+            {
+                product.setSmallImage();
+            }
+
+            mainProgressBar.setProgress(75);
+
             product.setReviewStats();
-            viewProductActivity.get().mainProgressBar.setProgress(90);
+            mainProgressBar.setProgress(90);
+
             product.setDescription();
-            viewProductActivity.get().mainProgressBar.setProgress(100);
+            mainProgressBar.setProgress(MAX_PRODUCT_PROGRESS);
         }
 
         return product;
     }
 
     /**
-     * Called when there is new data to deliver to the client.
+     * Called when there is new data to deliver.
      */
     @Override public void deliverResult(Product product)
     {
@@ -87,28 +129,31 @@ class ProductLoader extends AsyncTaskLoader<Product>
      */
     @Override protected void onStartLoading()
     {
-        /*
-        if (product != null)
-        {
-            deliverResult(product);
-        }
-*/
         if (takeContentChanged() || product == null)
         {
             forceLoad();
         }
     }
 
+    /**
+     * Handles a request to stop the Loader.
+     */
     @Override public void onStopLoading()
     {
         cancelLoad();
     }
 
+    /**
+     * Handles a request to cancel the loader.
+     */
     @Override public void onCanceled(Product product)
     {
         super.onCanceled(product);
     }
 
+    /**
+     * Handles a request to reset the loader.
+     */
     @Override protected void onReset()
     {
         super.onReset();

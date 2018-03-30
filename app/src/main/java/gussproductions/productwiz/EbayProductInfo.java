@@ -42,6 +42,11 @@ class EbayProductInfo extends ProductInfo
 
     private ArrayList<Review> productPageReviews;
 
+    /**
+     * Sets the eBay product information given a UPC (if the product is listed on eBay).
+     *
+     * @param upc The product upc.
+     */
     EbayProductInfo(String upc)
     {
         EbayRequestHelper ebayRequestHelper = new EbayRequestHelper(upc, EbayRequestMode.FIND_ITEMS_BY_PRODUCT);
@@ -133,8 +138,6 @@ class EbayProductInfo extends ProductInfo
                                                                     .first()
                                                                     .getElementsByClass("ebay-review-item-r");
 
-
-
                     // Parses the rating counts for each rating.
                     for (int i = unparsedRatingCounts.size() - 1; i >= 0; i--)
                     {
@@ -146,22 +149,14 @@ class EbayProductInfo extends ProductInfo
                     if (reviewResultPage.getElementsByClass("sar-btn right").first() != null)
                     {
                         hasMoreReviews = true;
-
-
-
-
                     }
                     else
                     {
                         Elements unparsedReviews = reviewResultPage.getElementsByClass("ebay-review-section");
-
-
+                                 hasReviews      = true;
 
                         // This method is called here instead of getMoreReviews to save time.
-                        hasReviews = true;
                         productPageReviews = parseReviews(unparsedReviews);
-
-
                     }
                 }
                 else
@@ -177,25 +172,27 @@ class EbayProductInfo extends ProductInfo
     }
 
     /**
-     * Parses reviews given unparsedReviews
+     * Parses all of the reviews on the next review page of an eBay product.
+     *
+     * @param unparsedReviews The unparsed review elements.
+     * @return The parsed reviews.
      */
     private ArrayList<Review> parseReviews(Elements unparsedReviews)
     {
         ArrayList<Review> reviews = new ArrayList<>();
         DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
+        // If the eBay product has more review besides the 5 on the standard review page, they are parsed.
         if (hasMoreReviews)
         {
             for (Element unparsedReview : unparsedReviews)
             {
-                Date reviewDate = new Date();
+                Date reviewDate    = new Date();
                 String reviewTitle = unparsedReview
-                        .getElementsByClass("review-item-title rvw-nowrap-spaces")
-                        .text();
+                        .getElementsByClass("review-item-title rvw-nowrap-spaces").text();
 
                 String reviewText = unparsedReview
-                        .getElementsByClass("review-item-content rvw-wrap-spaces")
-                        .text();
+                        .getElementsByClass("review-item-content rvw-wrap-spaces").text();
 
                 StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview
                             .getElementsByClass("ebay-star-rating")
@@ -204,21 +201,26 @@ class EbayProductInfo extends ProductInfo
                 Integer numHelpful = Integer.parseInt(unparsedReview
                         .getElementsByClass("positive-h-c").text().trim()
                         .replaceAll(",", ""));
+
                 Integer numUnhelpful = Integer.parseInt(unparsedReview
                         .getElementsByClass("negative-h-c").text().trim()
                         .replaceAll(",", ""));
 
-                try {
-                    reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("review-item-date")
-                            .text());
-                } catch (ParseException pe) {
+                try
+                {
+                    reviewDate = dateFormat.parse(unparsedReview.getElementsByClass("review-item-date").text());
+                }
+                catch (ParseException pe)
+                {
                     pe.printStackTrace();
                 }
 
                 // Each parsed review datum is added to a new review and added to the product's reviews.
-                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful, Retailer.EBAY));
+                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful,
+                                       Retailer.EBAY));
             }
         }
+        // Otherwise, the 5 or less reviews on the standard product page are parsed.
         else if (hasReviews)
         {
             for (Element unparsedReview : unparsedReviews)
@@ -233,7 +235,8 @@ class EbayProductInfo extends ProductInfo
                         .text();
 
                 StarRating starRating = StarRating.valueOf(Integer.parseInt(unparsedReview
-                            .getElementsByClass("ebay-star-rating").attr("aria-label").substring(0, 1)));
+                            .getElementsByClass("ebay-star-rating").attr("aria-label")
+                            .substring(0, 1)));
 
                 Integer numHelpful = Integer.parseInt(unparsedReview
                         .getElementsByClass("positive-h-c").text().trim()
@@ -250,7 +253,8 @@ class EbayProductInfo extends ProductInfo
                 }
 
                 // Each parsed review datum is added to a new review and added to the product's reviews.
-                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful, Retailer.EBAY));
+                reviews.add(new Review(reviewTitle, reviewText, starRating, reviewDate, numHelpful, numUnhelpful,
+                                       Retailer.EBAY));
             }
         }
 
@@ -259,6 +263,8 @@ class EbayProductInfo extends ProductInfo
 
     /**
      * Parses all of the reviews on the next review page of an eBay product.
+     *
+     * @return The parsed reviews.
      */
     ArrayList<Review> getMoreReviews()
     {

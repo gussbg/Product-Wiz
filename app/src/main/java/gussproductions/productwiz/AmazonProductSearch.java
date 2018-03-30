@@ -29,17 +29,24 @@ class AmazonProductSearch
 {
     private AmazonRequestHelper amazonRequestHelper;
     private Integer             totalPageNum;
-    private String              responseURL;
+    private String              requestURL;
     private int                 totalProductsScanned;
     private boolean             hasProducts;
-    private WeakReference<MainActivity> mainActivity;
 
-    final static int            PRODUCTS_PER_PAGE = 10;
+    final static int PRODUCTS_PER_PAGE = 10;
 
+    private WeakReference<MainActivity> mainActivity; // Needed to update the main activity's progress bar.
+
+    /**
+     * Constructs the AmazonProductSearch given search keywords. This constructor is only used by itself in unit
+     * testing. It is usually used within the second constructor.
+     *
+     * @param searchText The String of search keywords.
+     */
     AmazonProductSearch(String searchText)
     {
         totalProductsScanned = 0;
-        responseURL          = null;
+        requestURL = null;
 
         try
         {
@@ -50,11 +57,11 @@ class AmazonProductSearch
             e.printStackTrace();
         }
 
-        // The amazonRequestHelper generates the responseURL which links to XML data that can later be parsed.
-        responseURL = amazonRequestHelper.getRequestURL();
+        // The amazonRequestHelper generates the requestURL which links to XML data that can later be parsed.
+        requestURL = amazonRequestHelper.getRequestURL();
 
         // Handles the case if no products are returned.
-        if (!responseURL.equals(""))
+        if (!requestURL.equals(""))
         {
             hasProducts = true;
             calcTotalPages();
@@ -65,6 +72,13 @@ class AmazonProductSearch
         }
     }
 
+    /**
+     * This is the constructor that should be used outside of unit testing. As it sets the necessary reference to the
+     * application's main activity.
+     *
+     * @param searchText The String of search keywords.
+     * @param mainActivity A reference to the main android activity for updating it's progress bar.
+     */
     AmazonProductSearch(String searchText, WeakReference<MainActivity> mainActivity)
     {
         this(searchText);
@@ -79,23 +93,23 @@ class AmazonProductSearch
      */
     ArrayList<Product> getMoreProducts(int numProductsToParse)
     {
+        final int AMAZON_SEARCH_INCREMENT = 5;
+
         if (hasProducts)
         {
-            ArrayList<Product> productSet     = new ArrayList<>();
-            int productsParsed = 0;
+            ArrayList<Product> productSet = new ArrayList<>();
+            int productsParsed            = 0;
 
             for (Integer productPageNum = totalProductsScanned / PRODUCTS_PER_PAGE + 1;
                  productPageNum <= totalPageNum && productsParsed < numProductsToParse; productPageNum++)
             {
-
                 try
                 {
                     amazonRequestHelper.setProductPageNum(productPageNum);
 
-                    responseURL = amazonRequestHelper.getRequestURL();
-
-                    Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla")
-                            .ignoreHttpErrors(true).ignoreContentType(true).get();
+                    requestURL                 = amazonRequestHelper.getRequestURL();
+                    Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla")
+                                                      .ignoreHttpErrors(true).ignoreContentType(true).get();
                     Elements unparsedProducts  = productResultPage.select("Item");
 
                     if (unparsedProducts != null)
@@ -117,7 +131,7 @@ class AmazonProductSearch
                                 Product product         = new Product(new AmazonProductInfo(unparsedProduct), upc);
 
                                 productSet.add(product);
-                                mainActivity.get().mainProgressBar.incrementProgressBy(5);
+                                mainActivity.get().mainProgressBar.incrementProgressBy(AMAZON_SEARCH_INCREMENT); // Updates progress bar.
                                 productsParsed++;
                             }
                         }
@@ -149,7 +163,7 @@ class AmazonProductSearch
 
             try
             {
-                Document productResultPage = Jsoup.connect(responseURL).userAgent("Mozilla")
+                Document productResultPage = Jsoup.connect(requestURL).userAgent("Mozilla")
                                                   .ignoreHttpErrors(true).ignoreContentType(true).get();
                 Element  totalPagesElement = productResultPage.selectFirst("TotalPages");
                          totalPageNum      = Integer.parseInt(totalPagesElement.text());
@@ -168,8 +182,5 @@ class AmazonProductSearch
         }
     }
 
-    public boolean hasProducts()
-    {
-        return hasProducts;
-    }
+    public boolean hasProducts() { return hasProducts; }
 }

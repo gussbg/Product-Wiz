@@ -4,7 +4,6 @@
 
 package gussproductions.productwiz;
 
-
 /**
  * This request helper is used to generate the request URL that links to
  * XML data that can later be parsed into Walmart product or review information.

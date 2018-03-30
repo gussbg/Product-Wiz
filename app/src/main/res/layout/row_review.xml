@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,7 +10,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:textColor="@color/textColor"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,6 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:textColor="@color/textColor"
         app:layout_constraintBottom_toBottomOf="@+id/thumbDownText"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +49,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:textColor="@color/textColor"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,6 +67,7 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/thumb_up"
         android:visibility="visible"
+        android:contentDescription="@string/thumbs_up_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/reviewText"
         app:srcCompat="@drawable/thumb_up" />
@@ -75,6 +80,7 @@
         android:layout_marginStart="12dp"
         android:src="@drawable/thumb_down"
         android:visibility="visible"
+        android:contentDescription="@string/thumbs_down_image"
         app:layout_constraintStart_toEndOf="@+id/thumbUpText"
         app:layout_constraintTop_toTopOf="@+id/thumbUpImage"
         app:srcCompat="@drawable/thumb_down" />
@@ -84,7 +90,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:textColor="@color/textColor"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbUpImage"
         app:layout_constraintStart_toEndOf="@+id/thumbUpImage"
         app:layout_constraintTop_toTopOf="@+id/thumbUpImage" />
 
@@ -93,7 +101,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:textColor="@color/textColor"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbDownImage"
         app:layout_constraintStart_toEndOf="@+id/thumbDownImage"
         app:layout_constraintTop_toTopOf="@+id/thumbDownImage" />
 
@@ -101,6 +111,7 @@
         android:id="@+id/thumbBuffer"
         android:layout_width="0dp"
         android:layout_height="8dp"
+        android:contentDescription="@string/thumb_buffer"
         app:layout_constraintEnd_toStartOf="@+id/thumbDownText"
         app:layout_constraintStart_toStartOf="@+id/thumbUpImage"
         app:layout_constraintTop_toBottomOf="@+id/thumbUpImage" />
@@ -114,6 +125,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:scaleType="fitStart"
+        android:contentDescription="@string/review_retailer"
         app:layout_constraintBottom_toBottomOf="@+id/thumbDownImage"
         app:layout_constraintEnd_toStartOf="@+id/reviewDate"
         app:layout_constraintStart_toEndOf="@+id/thumbDownText"

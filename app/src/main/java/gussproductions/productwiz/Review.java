@@ -38,5 +38,5 @@ class Review
     Date       getDate()         { return date;         }
     Integer    getNumHelpful()   { return numHelpful;   }
     Integer    getNumUnhelpful() { return numUnhelpful; }
-    Retailer   getRetailer()     { return retailer;    }
+    Retailer   getRetailer()     { return retailer;     }
 }

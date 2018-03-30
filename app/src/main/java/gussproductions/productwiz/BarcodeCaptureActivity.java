@@ -34,7 +34,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -42,7 +41,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.CommonStatusCodes;
 
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -51,9 +49,9 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import java.io.IOException;
 
 /**
- * Activity for the multi-tracker app.  This app detects barcodes and displays the value with the
- * rear facing camera. During detection overlay graphics are drawn to indicate the position,
- * size, and ID of each barcode.
+ * This activity captures a barcode with the device's camera assuming the user gives the app permission.
+ * This file is slightly modified from the original open source version by changing the preview frame size to fill the
+ * device's screen. It also sends the captured barcode to a different activity, the ViewProductActivity.
  */
 public final class BarcodeCaptureActivity extends AppCompatActivity implements BarcodeGraphicTracker.BarcodeUpdateListener
 {
@@ -379,17 +377,20 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
     }
 
+    /**
+     * When the barcode is detected the ViewProductActivity is started and product information is loaded given
+     * the captured barcode.
+     *
+     * @param barcode The captured barcode.
+     */
     @Override
-    public void onBarcodeDetected(Barcode barcode) {
-        //do something with barcode data returned
+    public void onBarcodeDetected(Barcode barcode)
+    {
+        Intent viewProduct = new Intent(getApplicationContext(), ViewProductActivity.class);
 
-        Intent intent = new Intent(getApplicationContext(), ViewProductActivity.class);
+        viewProduct.putExtra(getResources().getString(R.string.barcode), barcode.displayValue);
+        viewProduct.putExtra(getResources().getString(R.string.calling_activity), getResources().getString(R.string.barcode_capture_activity_class));
 
-
-
-        intent.putExtra("Barcode", barcode.displayValue);
-        intent.putExtra(getResources().getString(R.string.calling_activity), getResources().getString(R.string.barcode_capture_activity_class));
-
-        this.startActivity(intent);
+        this.startActivity(viewProduct);
     }
 }

@@ -36,10 +36,8 @@ class RequestHelper
         // so a TreeMap implementation is used.
         SortedMap<String, String> sortedParamMap = new TreeMap<>(requestParams);
 
-        // Generate the canonical form of the query string.
-        String canonicalQS = canonicalize(sortedParamMap);
-
-        return canonicalQS;
+        // Generate and return the canonical form of the query string.
+        return canonicalize(sortedParamMap);
     }
 
     // All strings are handled as UTF-8.
@@ -80,11 +78,11 @@ class RequestHelper
 
     /**
      * Percent-encode values according the RFC 3986. The built-in Java
-     * URLEncoder does not encode according to the RFC, so we make the
-     * extra replacements.
+     * URLEncoder does not encode according to the RFC, so the extra
+     * replacements are made.
      *
-     * @param str decoded string
-     * @return  encoded string per RFC 3986
+     * @param str Decoded string.
+     * @return Encoded string per RFC 3986.
      */
     static String percentEncodeRfc3986(String str)
     {
@@ -105,8 +103,5 @@ class RequestHelper
         return out;
     }
 
-    String getRequestURL()
-    {
-        return requestURL;
-    }
+    String getRequestURL() { return requestURL; }
 }

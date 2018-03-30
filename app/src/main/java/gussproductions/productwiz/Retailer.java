@@ -1,10 +1,12 @@
 package gussproductions.productwiz;
 
 /**
- * Created by Brendon on 2/19/2018.
+ * The retailer enum is used track the retailer of a product and it's individual reviews.
+ *
+ * @author Brendon Guss
+ * @since  02/19/2018
  */
-
-public enum Retailer
+enum Retailer
 {
     AMAZON, BEST_BUY, EBAY, WALMART
 }

@@ -3,7 +3,7 @@ package gussproductions.productwiz;
 import java.io.Serializable;
 
 /**
- * This ReviewStatics class encapsulates all the attributes regarding reviews such as
+ * This ReviewStats class encapsulates all the attributes regarding reviews such as
  * the average rating, the number of stars per star ranking, and the total number of stars.
  *
  * @author Brendon Guss
@@ -74,6 +74,12 @@ class ReviewStats implements Serializable
         return totalStars;
     }
 
+    /**
+     * Adds review statistics to the current instance. This is used for
+     * the overall product review statistics added from individual retailers.
+     *
+     * @param reviewStats Review statistics to be added.
+     */
     void add(ReviewStats reviewStats)
     {
         if (reviewStats != null)
@@ -90,7 +96,12 @@ class ReviewStats implements Serializable
         this.maxStarCount  = calcMaxStarCount();
     }
 
-    Integer calcMaxStarCount()
+    /**
+     * Calculates which star rating (1-5) has the highest count.
+     *
+     * @return The high star rating count.
+     */
+    private Integer calcMaxStarCount()
     {
         Integer maxStarCount = 0;
 
@@ -106,15 +117,12 @@ class ReviewStats implements Serializable
     }
 
     // Getter methods.
-    public Integer getTotalStars()    { return totalStars;    }
-    public Integer getNumOneStars()   { return numStars[0];   }
-    public Integer getNumTwoStars()   { return numStars[1];   }
-    public Integer getNumThreeStars() { return numStars[2];   }
-    public Integer getNumFourStars()  { return numStars[3];   }
-    public Integer getNumFiveStars()  { return numStars[4];   }
-    Integer getMaxStarCount()
-    {
-        return maxStarCount;
-    }
-    public Double  getAverageRating() { return averageRating; }
+    Integer getTotalStars()    { return totalStars;    }
+    Integer getNumOneStars()   { return numStars[0];   }
+    Integer getNumTwoStars()   { return numStars[1];   }
+    Integer getNumThreeStars() { return numStars[2];   }
+    Integer getNumFourStars()  { return numStars[3];   }
+    Integer getNumFiveStars()  { return numStars[4];   }
+    Integer getMaxStarCount()  { return maxStarCount;  }
+    Double  getAverageRating() { return averageRating; }
 }

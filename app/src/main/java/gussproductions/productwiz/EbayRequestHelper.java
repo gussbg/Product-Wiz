@@ -18,6 +18,12 @@ class EbayRequestHelper extends RequestHelper
 {
     private final EbayRequestMode ebayRequestMode;
 
+    /**
+     * Constructs the EbayRequestHelper given an eBay productID and an eBay request mode.
+     *
+     * @param productID The eBay product ID.
+     * @param ebayRequestMode The eBay request mode.
+     */
     EbayRequestHelper(String productID, EbayRequestMode ebayRequestMode)
     {
         this.ebayRequestMode = ebayRequestMode;

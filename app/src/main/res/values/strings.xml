@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Product Wiz</string>
-    <string name="search_hint">Search for a product...</string>
+    <string name="search_hint">Search for a product&#8230;</string>
     <string name="no_products">No Products Found</string>
     <string name="load_more_products">Load More</string>
-
     <string name="ok">OK</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
@@ -25,12 +24,33 @@
     <string name="load_more_reviews">"Load More Reviews"</string>
     <string name="product_details">"Product Details"</string>
     <string name="no_bookmarks">"No Bookmarks Found"</string>
-    <string name="no_price_change">"No Price Change"</string>
     <string name="barcode_message">"Pinch/Stretch To Zoom"</string>
     <string name="view_bookmark_result">"ViewBookmarkResult"</string>
     <string name="bookmark_position">"BookmarkPosition"</string>
-
-
-
-
+    <string name="no_product">"Product Not Found"</string>
+    <string name="barcode">"Barcode"</string>
+    <string name="no_price_difference">(±%1$s)</string>
+    <string name="positive_price_difference">(+%1$s)</string>
+    <string name="negative_price_difference">(%1$s)</string>
+    <string name="bookmark_removed">"Bookmark Removed"</string>
+    <string name="bookmark_added">"Bookmark Added"</string>
+    <string name="one_star">"1 Star"</string>
+    <string name="two_star">"2 Star"</string>
+    <string name="three_star">"3 Star"</string>
+    <string name="four_star">"4 Star"</string>
+    <string name="five_star">"5 Star"</string>
+    <string name="load_reviews">"Load Reviews"</string>
+    <string name="num_reviews">"Number Of Reviews"</string>
+    <string name="amazon_logo">"Amazon Logo"</string>
+    <string name="bestbuy_logo">"BestBuy Logo"</string>
+    <string name="ebay_logo">"eBay Logo"</string>
+    <string name="walmart_logo">"Walmart Logo"</string>
+    <string name="proudct_image_view">"Product Image View"</string>
+    <string name="review_retailer">"Review Retailer"</string>
+    <string name="thumb_buffer">"Thumb Buffer"</string>
+    <string name="num_reviews_value">%1$s Reviews</string>
+    <string name="thumbs_down_image">"Thumbs Down Image"</string>
+    <string name="thumbs_up_image">"Thumbs Up Image"</string>
+    <string name="button_buffer">"Button Buffer"</string>
+    <string name="retailer_image">"Retailer Image"</string>
 </resources>

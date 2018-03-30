@@ -32,15 +32,22 @@ class Product implements Serializable
     private WalmartProductInfo walmartProductInfo;
     private BestbuyProductInfo bestbuyProductInfo;
     private EbayProductInfo    ebayProductInfo;
-    private BookmarkedProduct  bookmarkedProduct;
     private ReviewStats        reviewStats;
     private String             description;
     private int                amazonReviewsDelivered;
     private int                ebayReviewsDelivered;
     private int                walmartReviewsDelivered;
     private boolean            hasMoreReviews;
-    private boolean            basicReviewStats;
+    private boolean            hasBasicReviewStats;
 
+    /**
+     * Constructs a Product given it's Amazon product information and it's UPC.
+     * This constructor is used when the product is partially loaded from the
+     * Amazon product search.
+     *
+     * @param amazonProductInfo The Amazon product information.
+     * @param upc The product's UPC.
+     */
     Product(AmazonProductInfo amazonProductInfo, String upc)
     {
         this.upc                = upc;
@@ -50,6 +57,11 @@ class Product implements Serializable
         this.ebayProductInfo    = new EbayProductInfo(upc);
     }
 
+    /**
+     * Constructs a Product given it's UPC.
+     *
+     * @param upc The product's UPC.
+     */
     Product(String upc)
     {
         this.upc                = upc;
@@ -73,40 +85,45 @@ class Product implements Serializable
     ReviewStats        getReviewStats()           { return reviewStats;           }
     String             getDescription()           { return description;           }
     boolean            hasMoreReviews()           { return hasMoreReviews;        }
-    boolean            hasBasicReviewStats()      { return basicReviewStats;      }
 
+    /**
+     * Sets the product's large image, which is intended to be viewed in the ViewProductActivity.
+     */
     void setLargeImage()
     {
-        int largestHeight = 0;
+        int largestHeight   = 0;
         Bitmap largestImage = null;
 
-        if (amazonProductInfo.hasInfo() && amazonProductInfo.imageURL != null && !amazonProductInfo.imageURL.equals(""))
+        if (amazonProductInfo.hasInfo() && amazonProductInfo.imageURL != null
+                && !amazonProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(amazonProductInfo.imageURL);
 
             if (largeImage != null)
             {
-                largestImage = largeImage;
+                largestImage  = largeImage;
                 largestHeight = largeImage.getHeight();
             }
         }
-        if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.imageURL != null && !bestbuyProductInfo.imageURL.equals(""))
+        if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.imageURL != null
+                && !bestbuyProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(bestbuyProductInfo.imageURL);
 
             if (largeImage != null && largestHeight < largeImage.getHeight())
             {
-                largestImage = largeImage;
+                largestImage  = largeImage;
                 largestHeight = largeImage.getHeight();
             }
         }
-        if (walmartProductInfo.hasInfo() && walmartProductInfo.imageURL != null && !walmartProductInfo.imageURL.equals(""))
+        if (walmartProductInfo.hasInfo() && walmartProductInfo.imageURL != null
+                && !walmartProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(walmartProductInfo.imageURL);
 
             if (largeImage != null && largestHeight < largeImage.getHeight())
             {
-                largestImage = largeImage;
+                largestImage  = largeImage;
                 largestHeight = largeImage.getHeight();
             }
         }
@@ -123,9 +140,13 @@ class Product implements Serializable
         largeImage = largestImage;
     }
 
+    /**
+     * Sets the product's small image, which is intended to be viewed in the main activity in the product result list.
+     */
     void setSmallImage()
     {
-        if (!amazonProductInfo.hasInfo() || amazonProductInfo.smallImageURL == null || amazonProductInfo.smallImageURL.equals(""))
+        if (!amazonProductInfo.hasInfo() || amazonProductInfo.smallImageURL == null
+                || amazonProductInfo.smallImageURL.equals(""))
         {
             setLargeImage();
             smallImage = new SerializableBitmap(largeImage);
@@ -137,20 +158,33 @@ class Product implements Serializable
         }
     }
 
+    /**
+     * Loads the raw bitmap of the product's image URL.
+     *
+     * @param imageURL The product's image URL.
+     * @return The raw image bitmap.
+     */
     private Bitmap loadImage(String imageURL)
     {
-        Bitmap mIcon11 = null;
+        InputStream inputStream;
+        Bitmap imageBitmap = null;
 
-        try {
-            InputStream in = new java.net.URL(imageURL).openStream();
-            mIcon11 = BitmapFactory.decodeStream(in);
-        } catch (Exception e) {
+        try
+        {
+            inputStream = new java.net.URL(imageURL).openStream();
+            imageBitmap = BitmapFactory.decodeStream(inputStream);
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
 
-        return mIcon11;
+        return imageBitmap;
     }
 
+    /**
+     * Sets the lowest price, it's associated retailer, and product URL.
+     */
     void setLowestPriceInfo()
     {
         final BigDecimal MAX_PRICE = new BigDecimal(999999999);
@@ -186,6 +220,9 @@ class Product implements Serializable
         }
     }
 
+    /**
+     * Sets the product's review statistics.
+     */
     void setReviewStats()
     {
         Integer numStars[] = new Integer[5];
@@ -215,25 +252,32 @@ class Product implements Serializable
             reviewStats.add(walmartProductInfo.reviewStats);
         }
 
-        if (!amazonProductInfo.hasInfo() && !ebayProductInfo.hasInfo() && !walmartProductInfo.hasInfo() && bestbuyProductInfo.hasInfo())
+        if (!amazonProductInfo.hasInfo() && !ebayProductInfo.hasInfo() && !walmartProductInfo.hasInfo()
+                && bestbuyProductInfo.hasInfo())
         {
-            reviewStats      = bestbuyProductInfo.getReviewStats();
-            basicReviewStats = true;
+            reviewStats = bestbuyProductInfo.getReviewStats();
+            hasBasicReviewStats = true;
         }
 
     }
 
+    /**
+     * Sets the product's description.
+     */
     void setDescription()
     {
-        if (amazonProductInfo.hasInfo() && amazonProductInfo.getDescription() != null && !amazonProductInfo.getDescription().equals(""))
+        if (amazonProductInfo.hasInfo() && amazonProductInfo.getDescription() != null
+                && !amazonProductInfo.getDescription().equals(""))
         {
             description = amazonProductInfo.getDescription();
         }
-        else if (walmartProductInfo.hasInfo() && walmartProductInfo.getDescription() != null && !walmartProductInfo.getDescription().equals(""))
+        else if (walmartProductInfo.hasInfo() && walmartProductInfo.getDescription() != null
+                && !walmartProductInfo.getDescription().equals(""))
         {
             description = walmartProductInfo.getDescription();
         }
-        else if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.getDescription() != null && !bestbuyProductInfo.getDescription().equals(""))
+        else if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.getDescription() != null
+                && !bestbuyProductInfo.getDescription().equals(""))
         {
             description = bestbuyProductInfo.getDescription();
         }
@@ -245,16 +289,23 @@ class Product implements Serializable
         }
     }
 
+    /**
+     * Gives more reviews for a product from every retailer where it is available except for BestBuy.
+     * The reviews are shuffled so reviews from different retailers are mixed.
+     *
+     * @return The products reviews from the first page of a product's reviews from every retailer that carries it.
+     */
     ArrayList<Review> getMoreReviews()
     {
-        ArrayList<Review> combinedReviews = new ArrayList<>();
+        ArrayList<Review> combinedReviews;
         ArrayList<Review> amazonReviews;
         ArrayList<Review> ebayReviews;
         ArrayList<Review> walmartReviews;
 
-        amazonReviews  = amazonProductInfo.getMoreReviews();
-        ebayReviews    = ebayProductInfo.getMoreReviews();
-        walmartReviews = walmartProductInfo.getMoreReviews();
+        combinedReviews = new ArrayList<>();
+        amazonReviews   = amazonProductInfo.getMoreReviews();
+        ebayReviews     = ebayProductInfo.getMoreReviews();
+        walmartReviews  = walmartProductInfo.getMoreReviews();
 
         combinedReviews.addAll(amazonReviews);
         combinedReviews.addAll(ebayReviews);
@@ -271,6 +322,12 @@ class Product implements Serializable
         return combinedReviews;
     }
 
+    /**
+     * Determines if there are more reviews for the product.
+     *
+     * @param deliveredReviews The most recently displayed reviews.
+     * @return If the product has more reviews, this returns true.
+     */
     private boolean hasMoreReviews(ArrayList<Review> deliveredReviews)
     {
         if (walmartProductInfo.hasInfo() && amazonReviewsDelivered == 0 && ebayReviewsDelivered == 0
@@ -285,12 +342,29 @@ class Product implements Serializable
             return false;
         }
 
-        if (ebayProductInfo.hasInfo() && amazonReviewsDelivered == 0 && walmartReviewsDelivered == 0
-                && ebayReviewsDelivered < EbayProductInfo.REVIEW_PAGE_MAX_SIZE)
-        {
-            return false;
-        }
+        return (!ebayProductInfo.hasInfo() || amazonReviewsDelivered != 0 || walmartReviewsDelivered != 0
+                || ebayReviewsDelivered >= EbayProductInfo.REVIEW_PAGE_MAX_SIZE) && deliveredReviews.size() != 0;
+    }
 
-        return deliveredReviews.size() != 0;
+    /**
+     * Determines if the product has any information from any retailer.
+     *
+     * @return If the product has any information, this returns true.
+     */
+    boolean hasInfo()
+    {
+        return amazonProductInfo.hasInfo() || ebayProductInfo.hasInfo() || bestbuyProductInfo.hasInfo()
+                || walmartProductInfo.hasInfo();
+    }
+
+    /**
+     * Determines if the product has only basic review statistics, this only occurs if BestBuy is the only retailer in
+     * which the product is available.
+     *
+     * @return If the product has basic review statistics, this returns true.
+     */
+    boolean hasBasicReviewStats()
+    {
+        return hasBasicReviewStats;
     }
 }

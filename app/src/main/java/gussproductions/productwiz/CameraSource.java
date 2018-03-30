@@ -32,9 +32,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.annotation.StringDef;
 import android.support.v4.app.ActivityCompat;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -77,7 +75,8 @@ import java.util.Map;
  * </ul>
  */
 @SuppressWarnings("deprecation")
-public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCallback {
+class CameraSource implements ActivityCompat.OnRequestPermissionsResultCallback
+{
     @SuppressLint("InlinedApi")
     public static final int CAMERA_FACING_BACK = CameraInfo.CAMERA_FACING_BACK;
     @SuppressLint("InlinedApi")
@@ -178,7 +177,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
     /**
      * Builder for configuring and creating an associated camera source.
      */
-    public static class Builder {
+    static class Builder {
         private final Detector<?> mDetector;
         private CameraSource mCameraSource = new CameraSource();
 
@@ -186,7 +185,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
          * Creates a camera source builder with the supplied context and detector.  Camera preview
          * images will be streamed to the associated detector upon starting the camera source.
          */
-        public Builder(Context context, Detector<?> detector) {
+        Builder(Context context, Detector<?> detector) {
             if (context == null) {
                 throw new IllegalArgumentException("No context supplied.");
             }
@@ -202,7 +201,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
          * Sets the requested frame rate in frames per second.  If the exact requested value is not
          * not available, the best matching available value is selected.   Default: 30.
          */
-        public Builder setRequestedFps(float fps) {
+        Builder setRequestedFps(float fps) {
             if (fps <= 0) {
                 throw new IllegalArgumentException("Invalid fps: " + fps);
             }
@@ -210,12 +209,12 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
             return this;
         }
 
-        public Builder setFocusMode(@FocusMode String mode) {
+        Builder setFocusMode(@FocusMode String mode) {
             mCameraSource.mFocusMode = mode;
             return this;
         }
 
-        public Builder setFlashMode(@FlashMode String mode) {
+        Builder setFlashMode(@FlashMode String mode) {
             mCameraSource.mFlashMode = mode;
             return this;
         }
@@ -226,7 +225,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
          * Also, we try to select a preview size which corresponds to the aspect ratio of an
          * associated full picture size, if applicable.  Default: 1024x768.
          */
-        public Builder setRequestedPreviewSize(int width, int height) {
+        Builder setRequestedPreviewSize(int width, int height) {
             // Restrict the requested range to something within the realm of possibility.  The
             // choice of 1000000 is a bit arbitrary -- intended to be well beyond resolutions that
             // devices can support.  We bound this to avoid int overflow in the code later.
@@ -243,7 +242,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
          * Sets the camera to use (either {@link #CAMERA_FACING_BACK} or
          * {@link #CAMERA_FACING_FRONT}). Default: back facing.
          */
-        public Builder setFacing(int facing) {
+        Builder setFacing(int facing) {
             if ((facing != CAMERA_FACING_BACK) && (facing != CAMERA_FACING_FRONT)) {
                 throw new IllegalArgumentException("Invalid camera: " + facing);
             }
@@ -254,7 +253,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
         /**
          * Creates an instance of the camera source.
          */
-        public CameraSource build() {
+        CameraSource build() {
             mCameraSource.mFrameProcessor = mCameraSource.new FrameProcessingRunnable(mDetector);
             return mCameraSource;
         }
@@ -330,7 +329,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
     /**
      * Stops the camera and releases the resources of the camera and underlying detector.
      */
-    public void release() {
+    void release() {
         synchronized (mCameraLock) {
             stop();
             mFrameProcessor.release();
@@ -577,7 +576,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
      */
     @Nullable
     @FocusMode
-    public String getFocusMode() {
+    String getFocusMode() {
         return mFocusMode;
     }
 
@@ -617,7 +616,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
      */
     @Nullable
     @FlashMode
-    public String getFlashMode() {
+    String getFlashMode() {
         return mFlashMode;
     }
 
@@ -628,7 +627,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
      * @return {@code true} if the flash mode is set, {@code false} otherwise
      * @see #getFlashMode()
      */
-    public boolean setFlashMode(@FlashMode String mode) {
+    boolean setFlashMode(@FlashMode String mode) {
         synchronized (mCameraLock) {
             if (mCamera != null && mode != null) {
                 Camera.Parameters parameters = mCamera.getParameters();
@@ -662,7 +661,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
      * @param cb the callback to run
      * @see #cancelAutoFocus()
      */
-    public void autoFocus(@Nullable AutoFocusCallback cb) {
+    void autoFocus(@Nullable AutoFocusCallback cb) {
         synchronized (mCameraLock) {
             if (mCamera != null) {
                 CameraAutoFocusCallback autoFocusCallback = null;
@@ -683,7 +682,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
      *
      * @see #autoFocus(AutoFocusCallback)
      */
-    public void cancelAutoFocus() {
+    void cancelAutoFocus() {
         synchronized (mCameraLock) {
             if (mCamera != null) {
                 mCamera.cancelAutoFocus();
@@ -933,7 +932,7 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
         private Size mPreview;
         private Size mPicture;
 
-        public SizePair(android.hardware.Camera.Size previewSize,
+        SizePair(android.hardware.Camera.Size previewSize,
                         android.hardware.Camera.Size pictureSize) {
             mPreview = new Size(previewSize.width, previewSize.height);
             if (pictureSize != null) {
@@ -941,12 +940,12 @@ public class CameraSource implements ActivityCompat.OnRequestPermissionsResultCa
             }
         }
 
-        public Size previewSize() {
+        Size previewSize() {
             return mPreview;
         }
 
         @SuppressWarnings("unused")
-        public Size pictureSize() {
+        Size pictureSize() {
             return mPicture;
         }
     }
