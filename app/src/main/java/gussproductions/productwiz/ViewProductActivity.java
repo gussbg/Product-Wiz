@@ -713,6 +713,8 @@ public class ViewProductActivity extends AppCompatActivity
             fourStarBar.setProgress(product.getReviewStats().getNumFourStars());
             fiveStarBar.setProgress(product.getReviewStats().getNumFiveStars());
 
+            oneStarBar.setPadding(0,0,0, convertDPtoPX(8));
+
             oneStarBar.setVisibility(View.VISIBLE);
             twoStarBar.setVisibility(View.VISIBLE);
             threeStarBar.setVisibility(View.VISIBLE);
@@ -739,6 +741,7 @@ public class ViewProductActivity extends AppCompatActivity
         if (product.getReviewStats().getTotalStars() > 0)
         {
             loadReviews.setVisibility(View.VISIBLE);
+            oneStarBar.setPadding(0,0,0,0);
         }
 
         loadReviews.setOnClickListener(new View.OnClickListener()
