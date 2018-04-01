@@ -240,6 +240,7 @@ public class MainActivity extends AppCompatActivity
                 productListView.setAdapter(productListAdapter);
                 productListView.removeFooterView(btnLoadMore);
                 searchView.clearFocus();
+                mainProgressBar.setProgress(0);
 
                 return false;
             }
@@ -348,6 +349,7 @@ public class MainActivity extends AppCompatActivity
         @Override public void onLoaderReset(Loader<ArrayList<Product>> productListLoader)
         {
             productListAdapter.clear();
+            productListLoader.forceLoad();
         }
     };
 
@@ -390,7 +392,10 @@ public class MainActivity extends AppCompatActivity
          *
          * @param amazonSearchLoader The Amazon search loader.
          */
-        @Override public void onLoaderReset(Loader<AmazonProductSearch> amazonSearchLoader) {}
+        @Override public void onLoaderReset(Loader<AmazonProductSearch> amazonSearchLoader)
+        {
+            amazonSearchLoader.forceLoad();
+        }
     };
 
     /**

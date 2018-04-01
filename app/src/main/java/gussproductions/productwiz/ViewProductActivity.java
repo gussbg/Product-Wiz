@@ -114,6 +114,7 @@ public class ViewProductActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        final int  PRODUCT_LOADER_ID     = 5;
         final int  REVIEW_LIST_LOADER_ID = 7;
 
         View header;
@@ -160,13 +161,21 @@ public class ViewProductActivity extends AppCompatActivity
             @Override
             public void onClick(View arg0)
             {
-                getLoaderManager().restartLoader(5, null, reviewLoaderListener);
+                getLoaderManager().restartLoader(REVIEW_LIST_LOADER_ID, null, reviewLoaderListener);
                 reviewList.removeFooterView(loadMoreReviews);
                 reviewList.addFooterView(reviewProgressMore);
             }
         });
 
-        getLoaderManager().initLoader(REVIEW_LIST_LOADER_ID, null, productLoaderListener).forceLoad();
+        if (callingActivity.equals(getResources().getString(R.string.main_activity_class)) || callingActivity.equals(getResources().getString(R.string.bookmark_activity_class)))
+        {
+            getLoaderManager().initLoader(PRODUCT_LOADER_ID, null, productLoaderListener).forceLoad();
+        }
+        else if (callingActivity.equals(getResources().getString(R.string.barcode_capture_activity_class)))
+        {
+            getLoaderManager().initLoader(PRODUCT_LOADER_ID, null, productLoaderListener);
+        }
+
         mainProgressBar.setVisibility(View.VISIBLE);
     }
 
