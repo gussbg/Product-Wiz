@@ -289,6 +289,30 @@ class Product implements Serializable
         }
     }
 
+    String getTitle()
+    {
+        if (amazonProductInfo.hasInfo)
+        {
+            return amazonProductInfo.getTitle();
+        }
+        else if (walmartProductInfo.hasInfo)
+        {
+            return walmartProductInfo.getTitle();
+        }
+        else if (bestbuyProductInfo.hasInfo)
+        {
+            return bestbuyProductInfo.getTitle();
+        }
+        else if (ebayProductInfo.hasInfo)
+        {
+            return ebayProductInfo.getTitle();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /**
      * Gives more reviews for a product from every retailer where it is available except for BestBuy.
      * The reviews are shuffled so reviews from different retailers are mixed.

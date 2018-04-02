@@ -413,6 +413,7 @@ public class MainActivity extends AppCompatActivity
         public void onScrollStateChanged(AbsListView view, int scrollState)
         {
             productListAdapter.notifyDataSetChanged();
+            productListView.invalidateViews();
         }
 
         // Unused method, needs to be overridden for the onScrollListener.

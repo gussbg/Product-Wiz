@@ -142,7 +142,7 @@ class BookmarkListAdapter extends ArrayAdapter<BookmarkedProduct>
 
         bookmarkList = parent.findViewById(R.id.bookmarkList);
 
-        productTitle.setText(product.getAmazonProductInfo().getTitle());
+        productTitle.setText(product.getTitle());
         productPrice.setText(priceFormat.format(product.getLowestPrice()));
 
         priceDiffVal = product.getLowestPrice().subtract(bookmarkedProduct.getPriceAdded());

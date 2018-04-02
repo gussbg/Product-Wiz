@@ -16,9 +16,9 @@ public class UnitTestSuite
     @Test
     public void test_amazon_search()
     {
-        AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dvd");
+        AmazonProductSearch amazonProductSearch = new AmazonProductSearch("dark crystal");
 
-        amazonProductSearch.getMoreProducts(10);
+        //amazonProductSearch.getMoreProducts(10);
 
         ArrayList<Product> products = amazonProductSearch.getMoreProducts(10);
 
@@ -201,5 +201,30 @@ public class UnitTestSuite
         System.out.println(numFiveStars);
 
         product.setDescription();
+    }
+
+    @Test
+    public void test_product()
+    {
+        Product product = new Product("813358001649");
+
+        System.out.println(product.getAmazonProductInfo().hasInfo());
+        System.out.println(product.getWalmartProductInfo().hasInfo());
+        System.out.println(product.getBestbuyProductInfo().hasInfo());
+        System.out.println(product.getEbayProductInfo().hasInfo());
+
+        product.setDescription();
+        product.setLargeImage();
+        product.setLowestPriceInfo();
+        product.setSmallImage();
+        product.setReviewStats();
+
+        System.out.println(product.getAmazonProductInfo().getTitle());
+
+        System.out.println(product.getLowestPriceRetailer());
+
+        System.out.println(product.hasBasicReviewStats());
+
+        System.out.println(product.getDescription());
     }
 }

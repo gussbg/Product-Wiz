@@ -265,7 +265,7 @@ public class ViewProductActivity extends AppCompatActivity
 
                 productImage.setVisibility(View.VISIBLE);
 
-                productTitle.setText(product.getAmazonProductInfo().getTitle());
+                productTitle.setText(product.getTitle());
                 productTitle.setVisibility(View.VISIBLE);
 
                 if (product.getDescription() != null && !product.getDescription().equals(""))
@@ -278,9 +278,9 @@ public class ViewProductActivity extends AppCompatActivity
                 setRetailerConstraints();
 
                 setRetailerView(product.getAmazonProductInfo(), amazonPrice, amazonBuyButton, amazonLogo);
+                setRetailerView(product.getWalmartProductInfo(), walmartPrice, walmartBuyButton, walmartLogo);
                 setRetailerView(product.getBestbuyProductInfo(), bestbuyPrice, bestbuyButton, bestbuyLogo);
                 setRetailerView(product.getEbayProductInfo(), ebayPrice, ebayBuyButton, ebayLogo);
-                setRetailerView(product.getWalmartProductInfo(), walmartPrice, walmartBuyButton, walmartLogo);
 
                 setBookmarkViews();
                 setReviewStatViews();
@@ -442,7 +442,7 @@ public class ViewProductActivity extends AppCompatActivity
         if (product.getAmazonProductInfo().hasInfo())
         {
             constraintSet.connect(amazonBuyButton.getId(), ConstraintSet.TOP,
-                                  productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
+                    productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
             constraintSet.applyTo(constraintLayout);
         }
 
@@ -453,13 +453,13 @@ public class ViewProductActivity extends AppCompatActivity
             if (product.getAmazonProductInfo().hasInfo())
             {
                 constraintSet.connect(walmartBuyButton.getId(), ConstraintSet.TOP,
-                                      amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else
             {
                 constraintSet.connect(walmartBuyButton.getId(), ConstraintSet.TOP,
-                                      productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                        productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
                 constraintSet.applyTo(constraintLayout);
             }
         }
@@ -471,19 +471,19 @@ public class ViewProductActivity extends AppCompatActivity
             if (product.getWalmartProductInfo().hasInfo())
             {
                 constraintSet.connect(bestbuyButton.getId(), ConstraintSet.TOP,
-                                      walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else if (product.getAmazonProductInfo().hasInfo())
             {
                 constraintSet.connect(bestbuyButton.getId(), ConstraintSet.TOP,
-                                      amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else
             {
                 constraintSet.connect(bestbuyButton.getId(), ConstraintSet.TOP,
-                                      productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
+                        productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
                 constraintSet.applyTo(constraintLayout);
             }
         }
@@ -495,70 +495,72 @@ public class ViewProductActivity extends AppCompatActivity
             if (product.getBestbuyProductInfo().hasInfo())
             {
                 constraintSet.connect(ebayBuyButton.getId(), ConstraintSet.TOP,
-                                      bestbuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        bestbuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else if (product.getWalmartProductInfo().hasInfo())
             {
                 constraintSet.connect(ebayBuyButton.getId(), ConstraintSet.TOP,
-                                      walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else if (product.getAmazonProductInfo().hasInfo())
             {
                 constraintSet.connect(ebayBuyButton.getId(), ConstraintSet.TOP,
-                                      amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
+                        amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(TWO_DP));
                 constraintSet.applyTo(constraintLayout);
             }
             else
             {
                 constraintSet.connect(ebayBuyButton.getId(), ConstraintSet.TOP,
-                                      productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
+                        productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
                 constraintSet.applyTo(constraintLayout);
             }
         }
 
         // Sets the proper constraints for bookmark buttons depending on what retailer information is visible.
+
         if (product.getEbayProductInfo().hasInfo())
         {
             constraintSet.connect(removeBookmark.getId(), ConstraintSet.TOP,
-                                  ebayBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    ebayBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.connect(addBookmark.getId(), ConstraintSet.TOP,
-                                  ebayBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    ebayBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.applyTo(constraintLayout);
         }
         else if (product.getBestbuyProductInfo().hasInfo())
         {
             constraintSet.connect(removeBookmark.getId(), ConstraintSet.TOP,
-                                  bestbuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    bestbuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.connect(addBookmark.getId(), ConstraintSet.TOP, bestbuyButton.getId(),
-                                  ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.applyTo(constraintLayout);
         }
         else if (product.getWalmartProductInfo().hasInfo())
         {
             constraintSet.connect(removeBookmark.getId(), ConstraintSet.TOP,
-                                  walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.connect(addBookmark.getId(), ConstraintSet.TOP,
-                                  walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    walmartBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.applyTo(constraintLayout);
         }
         else if (product.getAmazonProductInfo().hasInfo())
         {
             constraintSet.connect(removeBookmark.getId(), ConstraintSet.TOP,
-                                  amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.connect(addBookmark.getId(), ConstraintSet.TOP,
-                                  amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
+                    amazonBuyButton.getId(), ConstraintSet.BOTTOM, convertDPtoPX(EIGHT_DP));
             constraintSet.applyTo(constraintLayout);
         }
         else
         {
             constraintSet.connect(removeBookmark.getId(), ConstraintSet.TOP,
-                                  productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
+                    productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
             constraintSet.connect(addBookmark.getId(), ConstraintSet.TOP,
-                                  productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
+                    productImage.getId(), ConstraintSet.BOTTOM, convertDPtoPX(SIXTEEN_DP));
             constraintSet.applyTo(constraintLayout);
         }
+
     }
 
     /**
@@ -749,21 +751,21 @@ public class ViewProductActivity extends AppCompatActivity
     {
         if (product.getReviewStats().getTotalStars() > 0)
         {
+            loadReviews.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View arg0)
+                {
+                    getLoaderManager().restartLoader(5, null, reviewLoaderListener);
+                    reviewList.removeFooterView(loadReviews);
+                    loadReviews.setVisibility(View.GONE);
+                    reviewProgress.setVisibility(View.VISIBLE);
+                }
+            });
+
             loadReviews.setVisibility(View.VISIBLE);
             oneStarBar.setPadding(0,0,0,0);
         }
-
-        loadReviews.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View arg0)
-            {
-                getLoaderManager().restartLoader(5, null, reviewLoaderListener);
-                reviewList.removeFooterView(loadReviews);
-                loadReviews.setVisibility(View.GONE);
-                reviewProgress.setVisibility(View.VISIBLE);
-            }
-        });
     }
 
     /**

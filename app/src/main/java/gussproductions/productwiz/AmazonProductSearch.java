@@ -131,7 +131,12 @@ class AmazonProductSearch
                                 Product product         = new Product(new AmazonProductInfo(unparsedProduct), upc);
 
                                 productSet.add(product);
-                                mainActivity.get().mainProgressBar.incrementProgressBy(AMAZON_SEARCH_INCREMENT); // Updates progress bar.
+
+                                if (mainActivity != null)
+                                {
+                                    mainActivity.get().mainProgressBar.incrementProgressBy(AMAZON_SEARCH_INCREMENT); // Updates progress bar.
+                                }
+
                                 productsParsed++;
                             }
                         }

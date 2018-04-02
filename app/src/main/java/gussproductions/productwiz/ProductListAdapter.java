@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -88,6 +89,8 @@ class ProductListAdapter extends ArrayAdapter<Product>
         final Gson gson;
 
         // Views
+        final ListView productList;
+
         final TextView productTitle;
         final TextView productPrice;
         final TextView priceDifference;
@@ -137,7 +140,9 @@ class ProductListAdapter extends ArrayAdapter<Product>
         btnAddBookmark    = productView.findViewById(R.id.addBookmark);
         btnRemoveBookmark = productView.findViewById(R.id.bookmarkAdded);
 
-        productTitle.setText(product.getAmazonProductInfo().getTitle());
+        productList = parent.findViewById(R.id.listView);
+
+        productTitle.setText(product.getTitle());
         productPrice.setText(priceFormat.format(product.getLowestPrice()));
 
         if (product.getSmallImage() == null)
@@ -207,6 +212,7 @@ class ProductListAdapter extends ArrayAdapter<Product>
 
                 // Refreshes the product ListView.
                 notifyDataSetChanged();
+                productList.invalidateViews();
 
                 Snackbar snackbar = Snackbar.make(view , R.string.bookmark_added,
                             Snackbar.LENGTH_SHORT);
@@ -230,6 +236,7 @@ class ProductListAdapter extends ArrayAdapter<Product>
 
                 // Refreshes the product ListView.
                 notifyDataSetChanged();
+                productList.invalidateViews();
 
                 Snackbar snackbar = Snackbar.make(view , R.string.bookmark_removed,
                         Snackbar.LENGTH_SHORT);
