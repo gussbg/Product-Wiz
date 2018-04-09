@@ -87,12 +87,15 @@ class Product implements Serializable
     boolean            hasMoreReviews()           { return hasMoreReviews;        }
 
     /**
-     * Sets the product's large image, which is intended to be viewed in the ViewProductActivity.
+     * Finds the best large image available and then sets the bitmap, which is intended to be
+     * viewed in the ViewProductActivity. If the large image on Amazon is available, it is used
+     * as it is typically of good quality and this helps reduce load times.
      */
     void setLargeImage()
     {
-        int largestHeight   = 0;
-        Bitmap largestImage = null;
+        boolean hasAmazonLargeImage = false;
+        int     largestHeight       = 0;
+        Bitmap  largestImage        = null;
 
         if (amazonProductInfo.hasInfo() && amazonProductInfo.imageURL != null
                 && !amazonProductInfo.imageURL.equals(""))
@@ -101,12 +104,14 @@ class Product implements Serializable
 
             if (largeImage != null)
             {
-                largestImage  = largeImage;
-                largestHeight = largeImage.getHeight();
+                hasAmazonLargeImage = true;
+                largestImage        = largeImage;
+                largestHeight       = largeImage.getHeight();
             }
         }
-        if (bestbuyProductInfo.hasInfo() && bestbuyProductInfo.imageURL != null
-                && !bestbuyProductInfo.imageURL.equals(""))
+
+        if (!hasAmazonLargeImage && bestbuyProductInfo.hasInfo()
+                && bestbuyProductInfo.imageURL != null && !bestbuyProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(bestbuyProductInfo.imageURL);
 
@@ -116,8 +121,9 @@ class Product implements Serializable
                 largestHeight = largeImage.getHeight();
             }
         }
-        if (walmartProductInfo.hasInfo() && walmartProductInfo.imageURL != null
-                && !walmartProductInfo.imageURL.equals(""))
+
+        if (!hasAmazonLargeImage && walmartProductInfo.hasInfo()
+                && walmartProductInfo.imageURL != null && !walmartProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(walmartProductInfo.imageURL);
 
@@ -127,7 +133,9 @@ class Product implements Serializable
                 largestHeight = largeImage.getHeight();
             }
         }
-        if (ebayProductInfo.hasInfo() && ebayProductInfo.imageURL != null && !ebayProductInfo.imageURL.equals(""))
+
+        if (!hasAmazonLargeImage && ebayProductInfo.hasInfo() && ebayProductInfo.imageURL != null
+                && !ebayProductInfo.imageURL.equals(""))
         {
             largeImage = loadImage(ebayProductInfo.imageURL);
 
