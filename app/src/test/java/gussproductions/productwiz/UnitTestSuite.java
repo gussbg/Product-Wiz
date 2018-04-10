@@ -56,7 +56,8 @@ public class UnitTestSuite
     @Test
     public void test_walmart_request()
     {
-        WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper("035000521019");
+        WalmartRequestHelper walmartRequestHelper = new WalmartRequestHelper("028400308175");
+        System.out.println(walmartRequestHelper.requestURL);
     }
 
     @Test

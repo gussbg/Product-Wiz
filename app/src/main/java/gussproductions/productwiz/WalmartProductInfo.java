@@ -50,7 +50,20 @@ class WalmartProductInfo extends ProductInfo
                     title       = unparsedProduct.getElementsByTag("name").text();
                     description = unparsedProduct.getElementsByTag("shortDescription").text().replaceAll("<.*?>", "");
                     productURL  = unparsedProduct.getElementsByTag("productUrl").text();
-                    imageURL    = unparsedProduct.getElementsByTag("largeImage").first().text();
+
+                    // Gets the highest quality image available.
+                    if (unparsedProduct.getElementsByTag("largeImage").first() == null)
+                    {
+                        if (unparsedProduct.getElementsByTag("mediumImage").first() != null)
+                        {
+                            imageURL = unparsedProduct.getElementsByTag("mediumImage").first().text();
+                        }
+                        else
+                        {
+                            imageURL = unparsedProduct.getElementsByTag("thumbnailImage").first().text();
+                        }
+                    }
+
                     hasInfo     = true;
                 }
                 else
